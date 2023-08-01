@@ -348,9 +348,9 @@
                     borderWidth: 0
                 }],
             };
-            if (statistic_data["total_acknowledged_annotaions"] > 0 || statistic_data["total_unacknowledged_annotations"] > 0) {
+            if (statistic_data["total_acknowledged_annotations"] > 0 || statistic_data["total_unacknowledged_annotations"] > 0) {
                 $('#pie-chart-content').removeClass("d-none")
-                $('#pie-chart-content').addClass("d-none")
+                $('#pie-chart-message').addClass("d-none")
                 new Chart(distribution_annotation_control, {
                     type: 'pie',
                     data: distribution_annotation_data,

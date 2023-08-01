@@ -8,6 +8,154 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
         rel="stylesheet">
+    <!-- Mapping -->
+    <script>
+        function initMap() {
+            $('#loading-message').html("Loading System Configuration...")
+            $('#progress-bar-loader').css("width", "25%")
+            $.ajax({
+                url: '/api/setting',
+                type: 'GET',
+                success: function (setting) {
+                    $('#loading-message').html("Fetching Map Configuration...")
+                    $('#progress-bar-loader').css("width", "75%")
+                    // Init map
+                    console.log(setting)
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: 4.228226, lng: 109.174870 },
+                        mapTypeControl: false,
+                        zoom: setting.MAP_INITIAL_ZOOM_LEVEL,
+                        minZoom: setting.MAP_MINIMUM_ZOOM_LEVEL, // Set the minimum allowed zoom level
+                        maxZoom: setting.MAP_MAXIMUM_ZOOM_LEVEL, // Set the maximum allowed zoom level
+                    },);
+                    google.maps.event.addListener(map, 'drag', limitEventsPerSecond(function () {
+                        checkViewport(map)
+                    }, 1));
+
+                    google.maps.event.addListener(map, 'zoom_changed', async function () {
+                        await isZoomChangedProcessing
+
+                        try {
+                            isZoomChangedProcessing = (async () => {
+                                closePanel()
+                                checkViewport(map)
+                                await delay(throttleDelay)
+                            })();
+                        } catch (error) {
+                            console.log('Error occured during event processing:', error)
+                        }
+                    });
+
+                    google.maps.event.addListenerOnce(map, 'idle', function () {
+                    })
+
+                    google.maps.event.addListener(map.getStreetView(), 'visible_changed', function () {
+                        closePanel()
+                    });
+
+                    $('#loading-message').html("Generating Map Components...")
+                    $('#progress-bar-loader').css("width", "99%")
+                    initAutocomplete(map)
+
+                    getCountryData((response) => {
+                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
+                    })
+                },
+            });
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms))
+        }
+
+        function checkViewport(map_data) {
+            var bounds = map_data.getBounds();
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var westMalaysiaBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(1.157, 99.641),
+                new google.maps.LatLng(7.521, 102.138)
+            );
+
+            var eastMalaysiaBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(0.842, 109.595),
+                new google.maps.LatLng(7.529, 119.618)
+            );
+
+            var westMalaysiaVisible = westMalaysiaBounds.intersects(bounds);
+            var eastMalaysiaVisible = eastMalaysiaBounds.intersects(bounds);
+
+            if (map.getZoom() <= 7) {
+                if (!showCountryStats) {
+                    showCountryStats = true
+                    showStateStats = false
+                    removeAllAnnotateMarker()
+                    removeStateMalaysiaMarker()
+                    getCountryData((response) => {
+                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
+                    })
+                }
+                return;
+            } else {
+                if (map.getZoom() >= 8 && map.getZoom() <= 9) {
+                    removeAllAnnotateMarker()
+                    removeEastWestMalaysiaMarker()
+                    if (!showStateStats) {
+                        showStateStats = true
+                        getStateData((response) => {
+                            addStateMalaysiaMarker(map, response)
+                        })
+                    }
+                    showCountryStats = false;
+                    return;
+                } else {
+                    removeEastWestMalaysiaMarker()
+                    removeStateMalaysiaMarker()
+                    getAllData((response) => {
+                        if (annotateMarker.length == 0) {
+                            response.forEach((obj) => {
+                                if (obj.annotation.pothole > 0) {
+                                    marker = addMarker(map, obj.location.latlng.latitude, obj.location.latlng.longitude, obj)
+                                    annotateMarker.push({ "id": obj.id, "marker": marker })
+                                }
+                            })
+                        }
+                    })
+                    showCountryStats = false;
+                    showStateStats = false;
+                    return;
+                }
+            }
+        }
+
+        function limitEventsPerSecond(callback, limit) {
+            var timerId;
+            var counter = 0;
+
+            function resetCounter() {
+                counter = 0;
+            }
+
+            return function () {
+                counter++;
+                clearTimeout(timerId);
+
+                if (counter === 1) {
+                    // First event, execute immediately
+                    callback.apply(this, arguments);
+                    timerId = setTimeout(resetCounter, 1000);
+                } else if (counter <= limit) {
+                    // Events within the limit, execute after a delay
+                    timerId = setTimeout(function () {
+                        callback.apply(this, arguments);
+                        timerId = setTimeout(resetCounter, 1000);
+                    }, 1000 / limit);
+                } else {
+                    // Exceeded the limit, do not execute the event
+                }
+            };
+        }
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"
         integrity="sha512-42PE0rd+wZ2hNXftlM78BSehIGzezNeQuzihiBCvUEB3CVxHvsShF86wBWwQORNxNINlBPuq7rG4WWhNiTVHFg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -179,154 +327,6 @@
         var isZoomChangedProcessing = Promise.resolve()
         var tempImageAnnotationID
         const throttleDelay = 100
-    </script>
-    <!-- Mapping -->
-    <script>
-        function initMap() {
-            $('#loading-message').html("Loading System Configuration...")
-            $('#progress-bar-loader').css("width", "25%")
-            $.ajax({
-                url: '/api/setting',
-                type: 'GET',
-                success: function (setting) {
-                    $('#loading-message').html("Fetching Map Configuration...")
-                    $('#progress-bar-loader').css("width", "75%")
-                    // Init map
-                    console.log(setting)
-                    map = new google.maps.Map(document.getElementById('map'), {
-                        center: { lat: 4.228226, lng: 109.174870 },
-                        mapTypeControl: false,
-                        zoom: setting.MAP_INITIAL_ZOOM_LEVEL,
-                        minZoom: setting.MAP_MINIMUM_ZOOM_LEVEL, // Set the minimum allowed zoom level
-                        maxZoom: setting.MAP_MAXIMUM_ZOOM_LEVEL, // Set the maximum allowed zoom level
-                    },);
-                    google.maps.event.addListener(map, 'drag', limitEventsPerSecond(function () {
-                        checkViewport(map)
-                    }, 1));
-
-                    google.maps.event.addListener(map, 'zoom_changed', async function () {
-                        await isZoomChangedProcessing
-
-                        try {
-                            isZoomChangedProcessing = (async () => {
-                                closePanel()
-                                checkViewport(map)
-                                await delay(throttleDelay)
-                            })();
-                        } catch (error) {
-                            console.log('Error occured during event processing:', error)
-                        }
-                    });
-
-                    google.maps.event.addListenerOnce(map, 'idle', function () {
-                    })
-
-                    google.maps.event.addListener(map.getStreetView(), 'visible_changed', function () {
-                        closePanel()
-                    });
-
-                    $('#loading-message').html("Generating Map Components...")
-                    $('#progress-bar-loader').css("width", "99%")
-                    initAutocomplete(map)
-
-                    getCountryData((response) => {
-                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
-                    })
-                },
-            });
-        }
-
-        function delay(ms) {
-            return new Promise(resolve => setTimeout(resolve, ms))
-        }
-
-        function checkViewport(map_data) {
-            var bounds = map_data.getBounds();
-            var sw = bounds.getSouthWest();
-            var ne = bounds.getNorthEast();
-            var westMalaysiaBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(1.157, 99.641),
-                new google.maps.LatLng(7.521, 102.138)
-            );
-
-            var eastMalaysiaBounds = new google.maps.LatLngBounds(
-                new google.maps.LatLng(0.842, 109.595),
-                new google.maps.LatLng(7.529, 119.618)
-            );
-
-            var westMalaysiaVisible = westMalaysiaBounds.intersects(bounds);
-            var eastMalaysiaVisible = eastMalaysiaBounds.intersects(bounds);
-
-            if (map.getZoom() <= 7) {
-                if (!showCountryStats) {
-                    showCountryStats = true
-                    showStateStats = false
-                    removeAllAnnotateMarker()
-                    removeStateMalaysiaMarker()
-                    getCountryData((response) => {
-                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
-                    })
-                }
-                return;
-            } else {
-                if (map.getZoom() >= 8 && map.getZoom() <= 9) {
-                    removeAllAnnotateMarker()
-                    removeEastWestMalaysiaMarker()
-                    if (!showStateStats) {
-                        showStateStats = true
-                        getStateData((response) => {
-                            addStateMalaysiaMarker(map, response)
-                        })
-                    }
-                    showCountryStats = false;
-                    return;
-                } else {
-                    removeEastWestMalaysiaMarker()
-                    removeStateMalaysiaMarker()
-                    getAllData((response) => {
-                        if (annotateMarker.length == 0) {
-                            response.forEach((obj) => {
-                                if (obj.annotation.pothole > 0) {
-                                    marker = addMarker(map, obj.location.latlng.latitude, obj.location.latlng.longitude, obj)
-                                    annotateMarker.push({ "id": obj.id, "marker": marker })
-                                }
-                            })
-                        }
-                    })
-                    showCountryStats = false;
-                    showStateStats = false;
-                    return;
-                }
-            }
-        }
-
-        function limitEventsPerSecond(callback, limit) {
-            var timerId;
-            var counter = 0;
-
-            function resetCounter() {
-                counter = 0;
-            }
-
-            return function () {
-                counter++;
-                clearTimeout(timerId);
-
-                if (counter === 1) {
-                    // First event, execute immediately
-                    callback.apply(this, arguments);
-                    timerId = setTimeout(resetCounter, 1000);
-                } else if (counter <= limit) {
-                    // Events within the limit, execute after a delay
-                    timerId = setTimeout(function () {
-                        callback.apply(this, arguments);
-                        timerId = setTimeout(resetCounter, 1000);
-                    }, 1000 / limit);
-                } else {
-                    // Exceeded the limit, do not execute the event
-                }
-            };
-        }
     </script>
     <!-- Marker -->
     <script>
