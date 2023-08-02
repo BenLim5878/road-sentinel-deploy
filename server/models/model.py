@@ -14,7 +14,7 @@ def run_yolo():
     weight_path = os.path.join(script_dir, 'yolov7', 'best.pt')
     output_folder = f"{script_dir}/../image_output"
     folder_name = get_current_date_time()
-    command = f"py {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
+    command = f"python {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
     subprocess.run(command, shell=True)
     annotations = yolo_post_processing(output_folder,folder_name)
     return annotations
