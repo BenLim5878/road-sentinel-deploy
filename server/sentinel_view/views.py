@@ -15,6 +15,7 @@ from collections import defaultdict
 from django.db.models import Count, Sum
 from datetime import timedelta, datetime
 from django.db.models.functions import ExtractHour, TruncHour
+from django_q.tasks import async_task
 
 def serve_html(request, path=None):
     # Construct the absolute file path

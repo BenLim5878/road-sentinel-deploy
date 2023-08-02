@@ -26,5 +26,7 @@ asgiref = "*"
 psycopg2 = "*"
 importlib-resources = "*"
 gunicorn = "*"
+uvicorn = "*"
+django-q = "*"
 
 [dev-packages]

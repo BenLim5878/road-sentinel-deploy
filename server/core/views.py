@@ -10,6 +10,7 @@ from .models import UserImage, ImageAnnotation,GeoLocationGoogle
 import datetime
 import requests
 from sentinel_view.models import SystemConfiguration
+from django_q.tasks import async_task
 
 
 @csrf_exempt
@@ -34,7 +35,7 @@ def process_image(request):
         processed_image = process_image_function(image)
         
         # Run image pipline
-        save_incoming_image(processed_image, latitude, longitude)
+        async_task(save_incoming_image, processed_image, latitude, longitude)
         
         return JsonResponse({'message': 'Image processed and saved successfully.'})
     else:

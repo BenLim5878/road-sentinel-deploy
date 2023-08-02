@@ -27,7 +27,7 @@ urlpatterns = [
     path('uploads', process_image, name='process_image'),
     path('api/img/result/<str:filename>', get_image, name='get_image'),
     re_path(r'^app/(?:(?P<path>.+)/)?$', serve_html, name='render_sentinel'),
-    path('',lambda request: redirect('/app')),
+    path('',lambda request: redirect('/app/')),
     path('api/img/resource/<str:img_name>', serve_img, name='render_img'),
     path('api/css/<str:css_filename>', serve_css, name='render_css'),
     path('api/geo/all', serve_geo_data, name="serve_compiled_data"),
