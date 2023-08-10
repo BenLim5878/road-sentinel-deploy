@@ -18,7 +18,8 @@
 <body class="bg-dark">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
         style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
-        <div class="d-flex flex-row align-items-center" style="gap: 10px">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color: transparent"
+            onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
                 <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
                 <g clip-path="url(#clip0_1_9)">
@@ -39,13 +40,16 @@
                 </defs>
             </svg>
             <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
-        </div>
+        </button>
         <div>
-            <button class="btn btn-light" onclick="window.location.href='/app'">
+            <button class="btn btn-light" onclick="window.location.href='/app/'">
                 Maps
             </button>
-            <button class="btn btn-success" onclick="window.location.href='/app/dashboard'">
+            <button class="btn btn-success" onclick="window.location.href='/app/dashboard/'">
                 Dashboard
+            </button>
+            <button class="btn btn-danger" onclick="window.location.href='/app/logout'">
+                <i class="bi bi-door-open-fill"></i>
             </button>
         </div>
     </header>
@@ -250,10 +254,10 @@
         </div>
         <section class="d-flex flex-column p-5"
             style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397)">
-            <button class="btn btn-primary" onclick="window.location.href='/app/dashboard'">
+            <button class="btn btn-primary" onclick="window.location.href='/app/dashboard/'">
                 Statistics
             </button>
-            <button class="btn btn-outline-secondary" onclick="window.location.href='/app/setting'">
+            <button class="btn btn-outline-secondary" onclick="window.location.href='/app/setting/'">
                 Settings
             </button>
         </section>
@@ -330,7 +334,6 @@
     </script>
     <script>
         function create_distribution_annotation_chart() {
-            statistic_data["total_acknowledged_annotations"] = 20
             const distribution_annotation_control = document.getElementById('pie-chart-statistic');
             const distribution_annotation_data = {
                 labels: [

@@ -2,8 +2,8 @@ import os
 import mimetypes
 import json
 from django.utils import timezone
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse ,HttpResponseNotFound
+from django.shortcuts import render, redirect
+from django.http import HttpResponse, JsonResponse ,HttpResponseNotFound, HttpResponseRedirect
 from django.conf import settings
 from core.models import ImageAnnotation, GeoLocationGoogle, UserImage
 from django.core.exceptions import ObjectDoesNotExist
@@ -16,16 +16,30 @@ from django.db.models import Count, Sum
 from datetime import timedelta, datetime
 from django.db.models.functions import ExtractHour, TruncHour
 from django_q.tasks import async_task
+from django.contrib.auth import authenticate, login, logout
 
 def serve_html(request, path=None):
     # Construct the absolute file path
     file_path = ""
-    if (path is None):
-        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "index.html")
-    elif (path == "dashboard"):
-        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "dashboard.html")
-    elif (path == "setting"):
-        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "setting.html")
+    session_id = request.COOKIES.get('sessionid')
+    if (session_id):
+        try:
+            session = request.session  # Access the session
+            if session.get_expiry_date() < timezone.now():
+                return redirect("login")
+            else:
+                if (path is None):
+                    file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "index.html")
+                elif (path == "dashboard"):
+                    file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "dashboard.html")
+                elif (path == "setting"):
+                    file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "setting.html")
+                else:
+                    return HttpResponseRedirect("/app/")
+        except KeyError:
+            return redirect("login")
+    else:
+        return redirect("login")
     # Read the file contents
     with open(file_path, 'r') as file:
         file_contents = file.read()
@@ -422,3 +436,41 @@ def serve_statistic_data(request):
     out["average_image_process_by_hour"]["based_on"] =  f'{total_days} days'
 
     return JsonResponse(out)
+
+@csrf_exempt
+def serve_login_page(request):
+    if request.method == 'GET':
+        session_id = request.COOKIES.get('sessionid')
+        if (session_id):
+            session = request.session
+            if session.get_expiry_date() > timezone.now():
+                return HttpResponseRedirect("/app/")
+        
+        logout(request)
+        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "login.html")
+        # Read the file contents
+        with open(file_path, 'r') as file:
+            file_contents = file.read()
+    elif request.method == 'POST':
+        data = json.loads(request.body)
+        user = authenticate(request, username=data["email"], password=data["password"])
+        if user is not None:
+            # Save session
+            login(request, user)
+            expiration_datetime = timezone.now() + timedelta(days=1)
+            request.session.set_expiry(expiration_datetime)
+            # Update user last login field
+            user.last_login = timezone.now()
+            user.save()
+            return JsonResponse({"id": user.id,"status":True})
+        else:
+            logout(request)
+            return JsonResponse({"status":False})
+        
+
+    # Return the file contents as an HTTP response
+    return HttpResponse(file_contents, content_type='text/html')
+
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect('/app/login/')

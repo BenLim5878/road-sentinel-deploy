@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/api/css/base.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"
+        integrity="sha384-IQsoLXl5PILFhosVNubq5LC7Qb9DXgDA9i+tQ8Zj3iwWAwPtgFTxbJ8NT4GN1R8p"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
+        integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
+        crossorigin="anonymous"></script>
+    <title>SentinelVision</title>
+    <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
+</head>
+
+<body class="bg-dark d-flex flex-column justify-content-center align-items-center" style="width: 100vw;height: 100vh">
+    <img style="width: 3.5%; margin-top: -5%" src="/api/img/resource/app-icon.png">
+    <section class="d-flex flex-column align-items-center" style="margin-top: 20px;">
+        <p class="text-light" style="font-family: Poppins;font-size: 1.4rem">Welcome Back!</p>
+        <div class="mt-7 d-flex flex-column" style="width: 150%;gap: 10px">
+            <div class="form-floating">
+                <input type="email" style="height: 55px;" class="form-control" id="login-email-field"
+                    placeholder="name@example.com">
+                <label for="login-email-field" class="text-sm">Email address</label>
+            </div>
+            <div class="form-floating mt-2 mb-8">
+                <input type="password" style="height: 55px;" class="form-control form-input" id="login-password-field"
+                    placeholder="Password">
+                <label for="login-password-field" class="text-sm">Password</label>
+            </div>
+            <button id="login-button" class="btn btn-success" disabled onclick="login()">
+                <p id="login-title">Login</p>
+                <div id="login-loader" class="spinner-border text-success text-sm"
+                    style="display:none;width: 20px;height: 20px" role="status">
+                </div>
+            </button>
+        </div>
+    </section>
+    <div id="login-error-message" class="bg-danger px-4 py-3 rounded align-items-center"
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 3%; right: 2%; gap: 10px; display: none">
+        <i class="bi bi-x-circle-fill text-light text-sm"></i>
+        <p class="text-light" style="font-size: 15px;">Incorrect credentials, please try again!</p>
+    </div>
+    <div class="progress"
+        style="position: fixed; top: 0px; left: 0px;width: 100vw;height: 0.2%; border-radius: 0px; background-color:transparent">
+        <div id="progress-bar-status" class="progress-bar bg-success" role="progressbar" style="width: 0%"
+            aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <script>
+        var numLoginFailed = 0
+
+        $('#login-email-field, #login-password-field').on("keyup", (event) => {
+            var email = $('#login-email-field').val()
+            var password = $('#login-password-field').val()
+            if (email.trim().length > 0 && password.length > 0) {
+                $('#login-button').prop('disabled', false)
+            } else {
+                $('#login-button').prop('disabled', true)
+            }
+
+            if (event.key === 'Enter') {
+                if ($('#login-button').attr("disabled") != "disabled") {
+                    login()
+                }
+            }
+        })
+
+        function login() {
+            $('#login-button').removeClass("btn-success")
+            $('#login-button').css("background-color", "gray")
+            $("#login-button").attr("disabled", true)
+            $('#login-title').css("display", "none")
+            $('#login-loader').css("display", "inline-block")
+            $('#login-error-message').css("display", "none")
+            $('#progress-bar-status').css("width", "15%")
+            $.ajax({
+                url: '/app/login',
+                type: 'POST',
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "email": $('#login-email-field').val().trim().toLowerCase(),
+                    "password": $('#login-password-field').val()
+                }),
+                success: function (response) {
+                    $('#progress-bar-status').css("width", "100%")
+                    if (response["status"]) {
+                        window.location.href = '/app/'
+                    } else {
+                        numLoginFailed++
+                        $('#login-error-message').css("display", "flex")
+                        $('#login-error-message').css("animation", "slideLeftFadeIn 0.5s forwards")
+                        $('#login-button').addClass("btn-success")
+                        $('#login-button').css("background-color", "")
+                        $("#login-button").attr("disabled", false)
+                        $('#login-title').css("display", "block")
+                        $('#login-loader').css("display", "none")
+                        setTimeout(() => {
+                            numLoginFailed--
+                            if (numLoginFailed == 0) {
+                                $('#login-error-message').css("display", "none")
+                            }
+                        }, 5000)
+                    }
+                    setTimeout(() => {
+                        $('#progress-bar-status').css("width", "0%")
+                    }, 800)
+                },
+            });
+        }
+    </script>
+    <style>
+        @keyframes slideLeftFadeIn {
+            0% {
+                right: -20%;
+                opacity: 0;
+            }
+
+            100% {
+                right: 2%;
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+
+</html>

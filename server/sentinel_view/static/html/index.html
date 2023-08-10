@@ -89,28 +89,26 @@
                 if (!showCountryStats) {
                     showCountryStats = true
                     showStateStats = false
-                    removeAllAnnotateMarker()
-                    removeStateMalaysiaMarker()
                     getCountryData((response) => {
                         addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
+                        removeAllAnnotateMarker()
+                        removeStateMalaysiaMarker()
                     })
                 }
                 return;
             } else {
                 if (map.getZoom() >= 8 && map.getZoom() <= 9) {
-                    removeAllAnnotateMarker()
-                    removeEastWestMalaysiaMarker()
                     if (!showStateStats) {
                         showStateStats = true
                         getStateData((response) => {
                             addStateMalaysiaMarker(map, response)
+                            removeAllAnnotateMarker()
+                            removeEastWestMalaysiaMarker()
                         })
                     }
                     showCountryStats = false;
                     return;
                 } else {
-                    removeEastWestMalaysiaMarker()
-                    removeStateMalaysiaMarker()
                     getAllData((response) => {
                         if (annotateMarker.length == 0) {
                             response.forEach((obj) => {
@@ -119,6 +117,8 @@
                                     annotateMarker.push({ "id": obj.id, "marker": marker })
                                 }
                             })
+                            removeEastWestMalaysiaMarker()
+                            removeStateMalaysiaMarker()
                         }
                     })
                     showCountryStats = false;
@@ -171,7 +171,8 @@
 <body class="bg-dark" style="overflow: hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
         style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
-        <div class="d-flex flex-row align-items-center" style="gap: 10px">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
+            onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
                 <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
                 <g clip-path="url(#clip0_1_9)">
@@ -192,7 +193,7 @@
                 </defs>
             </svg>
             <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
-        </div>
+        </button>
         <div class="container">
             <div class="form-group">
                 <input type="text" id="place-input" class="form-control"
@@ -201,11 +202,14 @@
             <div class="bg-dark" id="place-results"></div>
         </div>
         <div>
-            <button class="btn btn-success" onclick="window.location.href='/app'">
+            <button class="btn btn-success" onclick="window.location.href='/app/'">
                 Maps
             </button>
-            <button class="btn btn-light" onclick="window.location.href='/app/dashboard'">
+            <button class="btn btn-light" onclick="window.location.href='/app/dashboard/'">
                 Dashboard
+            </button>
+            <button class="btn btn-danger" onclick="window.location.href='/app/logout'">
+                <i class="bi bi-door-open-fill"></i>
             </button>
         </div>
     </header>

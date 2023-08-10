@@ -17,8 +17,8 @@ Including another URLconf
 from django.urls import path, re_path
 from core.views import process_image
 from img_api.views import get_image
-from sentinel_view.views import serve_html,serve_img,serve_css,serve_geo_data, serve_geo_data_country, serve_geo_data_state, serve_system_configuration_setting,serve_annotation_data,serve_statistic_data
-from test_api.views import process_latlong
+from sentinel_view.views import serve_html,serve_img,serve_css,serve_geo_data, serve_geo_data_country, serve_geo_data_state, serve_system_configuration_setting,serve_annotation_data,serve_statistic_data,serve_login_page,logout_user
+from test_api.views import process_latlong, create_default_user
 from django.shortcuts import redirect
 
 handler404 = 'sentinel_view.views.page_not_found'
@@ -27,6 +27,8 @@ urlpatterns = [
     path('uploads', process_image, name='process_image'),
     path('api/img/result/<str:filename>', get_image, name='get_image'),
     re_path(r'^app/(?:(?P<path>.+)/)?$', serve_html, name='render_sentinel'),
+    path('app/login', serve_login_page, name="login"),
+    path('app/logout', logout_user, name="logout"),
     path('',lambda request: redirect('/app/')),
     path('api/img/resource/<str:img_name>', serve_img, name='render_img'),
     path('api/css/<str:css_filename>', serve_css, name='render_css'),
@@ -37,5 +39,6 @@ urlpatterns = [
     path('api/annotation',serve_annotation_data, name="serve_annotation_data"),
     path('api/annotation/<str:annotation_id>',serve_annotation_data, name="serve_annotation_data"),
     path('api/statistic',serve_statistic_data, name="serve_statistic_data"),
-    path('api/test/coords/', process_latlong, name="test_coord_lat_lng")
+    path('api/test/coords/', process_latlong, name="test_coord_lat_lng"),
+    path('api/test/user/default',create_default_user, name="test_create_default_user"),
 ]

@@ -1,12 +1,17 @@
 from django.shortcuts import render
 import requests
-from django.http import JsonResponse
+from django.http import JsonResponse,HttpResponse,HttpResponseNotFound
+from django.contrib.auth.models import User
+from django.conf import settings
 
 def process_latlong(request):
-    lat = request.GET.get('lat')
-    lng = request.GET.get('lng')
-    address_components = get_address(lat, lng)
-    return JsonResponse(address_components)
+    if (settings.DEBUG):
+        lat = request.GET.get('lat')
+        lng = request.GET.get('lng')
+        address_components = get_address(lat, lng)
+        return JsonResponse(address_components)
+    else:
+        return HttpResponseNotFound()
     
     
 def get_address(latitude, longitude):
@@ -47,3 +52,10 @@ def get_address(latitude, longitude):
                     output["country"] = component['long_name']
     
     return output
+
+def create_default_user(request=None):
+    if (settings.DEBUG):
+        user = User.objects.create_user(username='admin@gmail.com', email='admin@gmail.com', password='admin',is_superuser=True, first_name="admin", last_name="admin",is_staff=True)
+        return HttpResponse()
+    else:
+        return HttpResponseNotFound()
