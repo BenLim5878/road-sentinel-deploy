@@ -86,9 +86,9 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'road_sentinel_db',
-        'USER': 'admin',
-        'PASSWORD': 'dZjov7s7jNdaxn81jQMcFSk4Qt9y0726',
-        'HOST': 'dpg-cj4k4995rnun1tgcvt00-a.singapore-postgres.render.com',
+        'USER': 'postgres',
+        'PASSWORD': 'postgres',
+        'HOST': '127.0.0.1',
         'PORT': '5432',
     }
 }
