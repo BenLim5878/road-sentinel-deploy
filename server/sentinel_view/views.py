@@ -457,8 +457,7 @@ def serve_login_page(request):
         if user is not None:
             # Save session
             login(request, user)
-            expiration_datetime = timezone.now() + timedelta(days=1)
-            request.session.set_expiry(expiration_datetime)
+            request.session.set_expiry(24 * 60 * 60)
             # Update user last login field
             user.last_login = timezone.now()
             user.save()
