@@ -197,7 +197,10 @@ def serve_geo_data_state(request):
         try:
             image_annotation = ImageAnnotation.objects.get(uuid_id=str(data.uuid))
             if image_annotation.numPothole > 0:
-                out[geo_location_google.state] += 1
+                if geo_location_google.state == "Federal Territory of Kuala Lumpur":
+                    out["Wilayah Persekutuan Kuala Lumpur"] += 1
+                else:
+                    out[geo_location_google.state] += 1
         except ObjectDoesNotExist:
             continue
     
@@ -403,7 +406,10 @@ def serve_statistic_data(request):
     for annotation in image_annotations:
         location = GeoLocationGoogle.objects.get(pk=annotation.uuid)
         state = location.state
-        out["total_potholes_by state"][state] +=  1
+        if state == "Federal Territory of Kuala Lumpur":
+            out["total_potholes_by state"][state] += 1
+        else:
+            out["total_potholes_by state"][state] +=  1
     
     # Total potholes by day past month
     total_days = 30
