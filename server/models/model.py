@@ -16,7 +16,7 @@ def run_yolo():
     folder_name = get_current_date_time()
     if not os.path.exists(f'{output_folder}/{folder_name}'):
         os.makedirs(f'{output_folder}/{folder_name}')
-    command = f"python {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
+    command = f"python3.9 {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
     subprocess.run(command, shell=True)
     annotations = yolo_post_processing(output_folder,folder_name)
     return annotations
