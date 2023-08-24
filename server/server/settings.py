@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': 'road_sentinel_db',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': '127.0.0.1',
+        'HOST': 'localhost',
         'PORT': '5432',
     }
 }
@@ -145,7 +145,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 Q_CLUSTER = {
     'name': 'DjangORM',
     'workers': 4,
-    'timeout': None,
+    'timeout': 60,
     'retry': 120,
     'queue_limit': 50,
     'bulk': 10,
