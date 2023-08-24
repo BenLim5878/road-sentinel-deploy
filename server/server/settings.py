@@ -26,7 +26,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
-# DEBUG = False
+# DEBUG = True
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS").split(" ")
 # ALLOWED_HOSTS = [
@@ -87,6 +87,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'road_sentinel_db',
         'USER': 'postgres',
+        # 'PASSWORD': 'admin123',
         'PASSWORD': 'postgres',
         'HOST': 'localhost',
         'PORT': '5432',

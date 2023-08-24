@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/api/css/base.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Mapping -->
+    <script>
+        function initMap() {
+            $('#loading-message').html("Loading System Configuration...")
+            $('#progress-bar-loader').css("width", "25%")
+            $.ajax({
+                url: '/api/setting',
+                type: 'GET',
+                success: function (setting) {
+                    $('#loading-message').html("Fetching Map Configuration...")
+                    $('#progress-bar-loader').css("width", "75%")
+                    // Init map
+                    console.log(setting)
+                    map = new google.maps.Map(document.getElementById('map'), {
+                        center: { lat: 4.228226, lng: 109.174870 },
+                        mapTypeControl: false,
+                        zoom: setting.MAP_INITIAL_ZOOM_LEVEL,
+                        minZoom: setting.MAP_MINIMUM_ZOOM_LEVEL, // Set the minimum allowed zoom level
+                        maxZoom: setting.MAP_MAXIMUM_ZOOM_LEVEL, // Set the maximum allowed zoom level
+                    },);
+                    google.maps.event.addListener(map, 'drag', limitEventsPerSecond(function () {
+                        checkViewport(map)
+                    }, 1));
+
+                    google.maps.event.addListener(map, 'zoom_changed', async function () {
+                        await isZoomChangedProcessing
+
+                        try {
+                            isZoomChangedProcessing = (async () => {
+                                closePanel()
+                                checkViewport(map)
+                                await delay(throttleDelay)
+                            })();
+                        } catch (error) {
+                            console.log('Error occured during event processing:', error)
+                        }
+                    });
+
+                    google.maps.event.addListenerOnce(map, 'idle', function () {
+                    })
+
+                    google.maps.event.addListener(map.getStreetView(), 'visible_changed', function () {
+                        closePanel()
+                    });
+
+                    $('#loading-message').html("Generating Map Components...")
+                    $('#progress-bar-loader').css("width", "99%")
+                    initAutocomplete(map)
+
+                    getCountryData((response) => {
+                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
+                    })
+                },
+            });
+        }
+
+        function delay(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms))
+        }
+
+        function checkViewport(map_data) {
+            var bounds = map_data.getBounds();
+            var sw = bounds.getSouthWest();
+            var ne = bounds.getNorthEast();
+            var westMalaysiaBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(1.157, 99.641),
+                new google.maps.LatLng(7.521, 102.138)
+            );
+
+            var eastMalaysiaBounds = new google.maps.LatLngBounds(
+                new google.maps.LatLng(0.842, 109.595),
+                new google.maps.LatLng(7.529, 119.618)
+            );
+
+            var westMalaysiaVisible = westMalaysiaBounds.intersects(bounds);
+            var eastMalaysiaVisible = eastMalaysiaBounds.intersects(bounds);
+
+            if (map.getZoom() <= 7) {
+                if (!showCountryStats) {
+                    showCountryStats = true
+                    showStateStats = false
+                    getCountryData((response) => {
+                        addEastWestMalaysiaMarker(map, response["east_malaysia_total_potholes"], response["west_malaysia_total_potholes"])
+                        removeAllAnnotateMarker()
+                        removeStateMalaysiaMarker()
+                    })
+                }
+                return;
+            } else {
+                if (map.getZoom() >= 8 && map.getZoom() <= 9) {
+                    if (!showStateStats) {
+                        showStateStats = true
+                        getStateData((response) => {
+                            addStateMalaysiaMarker(map, response)
+                            removeAllAnnotateMarker()
+                            removeEastWestMalaysiaMarker()
+                        })
+                    }
+                    showCountryStats = false;
+                    return;
+                } else {
+                    getAllData((response) => {
+                        if (annotateMarker.length == 0) {
+                            response.forEach((obj) => {
+                                if (obj.annotation.pothole > 0) {
+                                    marker = addMarker(map, obj.location.latlng.latitude, obj.location.latlng.longitude, obj)
+                                    annotateMarker.push({ "id": obj.id, "marker": marker })
+                                }
+                            })
+                            removeEastWestMalaysiaMarker()
+                            removeStateMalaysiaMarker()
+                        }
+                    })
+                    showCountryStats = false;
+                    showStateStats = false;
+                    return;
+                }
+            }
+        }
+
+        function limitEventsPerSecond(callback, limit) {
+            var timerId;
+            var counter = 0;
+
+            function resetCounter() {
+                counter = 0;
+            }
+
+            return function () {
+                counter++;
+                clearTimeout(timerId);
+
+                if (counter === 1) {
+                    // First event, execute immediately
+                    callback.apply(this, arguments);
+                    timerId = setTimeout(resetCounter, 1000);
+                } else if (counter <= limit) {
+                    // Events within the limit, execute after a delay
+                    timerId = setTimeout(function () {
+                        callback.apply(this, arguments);
+                        timerId = setTimeout(resetCounter, 1000);
+                    }, 1000 / limit);
+                } else {
+                    // Exceeded the limit, do not execute the event
+                }
+            };
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment-with-locales.min.js"
+        integrity="sha512-42PE0rd+wZ2hNXftlM78BSehIGzezNeQuzihiBCvUEB3CVxHvsShF86wBWwQORNxNINlBPuq7rG4WWhNiTVHFg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"
+        integrity="sha256-2Pmvv0kuTBOenSvLm6bvfBSSHrUJ+3A7x6P5Ebd07/g=" crossorigin="anonymous"></script>
+    <script
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9Uhy7ZXhqS6R0joT9Jcs88mhdJHNRk3c&callback=initMap&libraries=places"
+        async="false" defer></script>
+    <title>SentinelVision</title>
+    <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
+</head>
+
+<body class="bg-dark" style="overflow: hidden;">
+    <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
+        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
+            onclick="window.location.href='/app/'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
+                <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
+                <g clip-path="url(#clip0_1_9)">
+                    <path
+                        d="M43.12 47.66C42.44 48.21 42 49.05 42 50V61H56C58.2 61 60 59.2 60 57V45.05C58.11 44.38 56.09 44 54 44C49.95 44 46.13 45.4 43.12 47.66Z"
+                        fill="#364B44" />
+                    <path
+                        d="M54 41C59.5228 41 64 36.5228 64 31C64 25.4772 59.5228 21 54 21C48.4772 21 44 25.4772 44 31C44 36.5228 48.4772 41 54 41Z"
+                        fill="#00FFD0" />
+                    <path
+                        d="M41 31C41 28.83 41.54 26.8 42.47 25H28C25.8 25 24 26.8 24 29V57C24 58.1 24.45 59.1 25.18 59.83L44.81 40.2C42.46 37.84 41 34.59 41 31Z"
+                        fill="#009BFB" />
+                </g>
+                <defs>
+                    <clipPath id="clip0_1_9">
+                        <rect width="48" height="48" fill="white" transform="translate(18 19)" />
+                    </clipPath>
+                </defs>
+            </svg>
+            <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
+        </button>
+        <div class="container">
+            <div class="form-group">
+                <input type="text" id="place-input" class="form-control"
+                    placeholder="Search by place name, street, state, or country">
+            </div>
+            <div class="bg-dark" id="place-results"></div>
+        </div>
+        <div>
+            <button class="btn btn-success" onclick="window.location.href='/app/login'">
+                Staff Login
+            </button>
+        </div>
+    </header>
+    <div style="width:100%; height: 92vh;overflow:hidden">
+        <!-- App Loader -->
+        <div style="width: 25%;height:fit-content;margin:auto;margin-top: 20%;" id="app-loader">
+            <p class="text-white mb-5" style="font-size:16px;" id="loading-message">Initializing...</p>
+            <div class="progress" style="overflow: hidden;">
+                <div class="progress-bar bg-success" id="progress-bar-loader" role="progressbar" style="width: 0%"
+                    aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+                </div>
+            </div>
+        </div>
+        <!-- Google Maps -->
+        <div class="d-none" id="map" style="position:relative;width: 100%;height: 100%">
+        </div>
+        <!-- Image Viewer -->
+        <div id="image-viewer"
+            style="display:none;position:absolute;width: 100%;height: 92.5vh;top: 7.6%; left:0px;background-color: #000000d9;z-index:2;overflow:hidden">
+            <div onclick="closeImageViewer()" style="position:absolute;width:100%; height: 100%;z-index: 1"></div>
+            <button onclick="closeImageViewer()" id="close-image-viewer-btn"
+                style="background-color: transparent;position:absolute;margin-left:97vw;margin-top:1vh;z-index:3">
+                <i class="bi bi-x text-light" style="font-size: 33px;"></i>
+            </button>
+            <div class="align-self-center d-flex flex-column" style="margin:auto;gap: 4vh;position:relative;z-index:2">
+                <img id="image-viewer-content" class="align-self-center" style="max-height: 66vh" src="/">
+                <button id="download-image-btn" class="btn btn-success">Download Image</button>
+            </div>
+        </div>
+        <!-- Info Panel -->
+        <section style="position:absolute;z-index: 1;top: 11%;left: 1.5%;display:none" id="info-panel">
+            <div class="bg-dark rounded pb-8" style="width: 22vw; height: fit-content; box-shadow:
+            0 0 25px 3px #0000008c">
+                <div>
+                    <button onclick="closePanel()" id="close-panel-btn" style="background-color: transparent;">
+                        <i class="bi bi-x text-light"
+                            style="font-size: 25px;position:absolute; margin-left:90%; margin-top: -3%"></i>
+                    </button>
+                    <div id="info-panel-loader" class="flex-column justify-content-center align-items-center"
+                        style="height: 62vh;">
+                        <img src="/api/img/resource/panel-loader.gif" style="width: 300px;height:300px">
+                        <h5 class="text-light">Loading ...</h5>
+                    </div>
+                    <div id="info-panel-content" class="px-5" style="margin-top: -2%">
+                        <div class="d-flex flex-row align-items-center border-bottom pb-3"
+                            style="gap: 10px; border-color:#838383">
+                            <i id="panel-head-icon" class="bi bi-exclamation-triangle-fill"
+                                style="font-size: 17px;"></i>
+                            <p id="panel-head-title" class="text-light">Image Annotation</p>
+                        </div>
+                        <div class="py-3">
+                            <div class="d-grid" style="height: fit-content;width:fit-content;margin:auto">
+                                <img id="panel-img-container" src="/"
+                                    style="width: 100%;max-height:240px;object-fit:contain">
+                                <button id="enlarge-image-btn" onclick="openImageViewer()" title="Enlarge Image"
+                                    class="d-flex justify-content-center align-items-center"
+                                    style="border-radius: 50%; padding: 18px;background-color:#ffffffbf;position:absolute;justify-self:flex-end;margin-top: 1%; margin-right: 1%">
+                                    <i style="position: absolute;" class="bi bi-arrows-fullscreen"></i>
+                                </button>
+                            </div>
+                            <div>
+                                <div class="mt-6 mb-3">
+                                    <h4 id="panel-main-title" class="text-light" style="font-weight: 500">City, State
+                                    </h4>
+                                    <p id="panel-time-past" style="color:#757575">Time Past</p>
+                                </div>
+                                <div class="d-flex justify-content-between">
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1" style="gap: 8px">
+                                            <i class="bi bi-journal-richtext text-info"></i>
+                                            <h5 class="text-info" style="font-weight: 500;margin-top: 3px">Address</h5>
+                                        </div>
+                                        <p id="panel-first-address-line" class="text-secondary-info">street,</p>
+                                        <p id="panel-second-address-line" class="text-secondary-info">postal_code city,
+                                        </p>
+                                        <p id="panel-third-address-line" class="text-secondary-info">state,</p>
+                                        <p id="panel-fourth-address-line" class="text-secondary-info">country</p>
+                                        <p id="panel-fifth-address-line" class="text-secondary-info">latitude, longitude
+                                        </p>
+                                    </div>
+                                    <div class="mb-3">
+                                        <div class="d-flex align-items-center mb-1" style="gap: 8px">
+                                            <i class="bi bi-question-square text-warning"></i>
+                                            <h5 class="text-warning" style="font-weight: 500;margin-top: 3px">Potholes
+                                            </h5>
+                                        </div>
+                                        <p id="panel-number-pothole" class="text-secondary-info">Number: 0</p>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="d-flex align-items-center mb-1" style="gap: 8px">
+                                        <i class="bi bi-clock text-success"></i>
+                                        <h5 class="text-success" style="font-weight: 500;margin-top: 3px">Timestamp</h5>
+                                    </div>
+                                    <p id="panel-first-timestamp-message" class="text-secondary-info">Image Received on
+                                        1 January 1900 00:00:00</p>
+                                    <p id="panel-second-timestamp-message" class="text-secondary-info">Image Processed
+                                        on 1 January 1900 00:00:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    <!-- Variables -->
+    <script>
+        var map
+        var eastMalaysiaMarker
+        var westMalaysiaMarker
+        var stateMalaysiaMarker = []
+        var annotateMarker = []
+        var showCountryStats = true
+        var showStateStats = false
+        var isZoomChangedProcessing = Promise.resolve()
+        var tempImageAnnotationID
+        const throttleDelay = 100
+    </script>
+    <!-- Marker -->
+    <script>
+        function addEastWestMalaysiaMarker(map, num_east, num_west) {
+            var eastMalaysia = { lat: 4.2105, lng: 114.3310 };
+            var westMalaysia = { lat: 3.7896, lng: 103.0644 };
+
+            eastMalaysiaMarker = new google.maps.Marker({
+                position: eastMalaysia,
+                map: map,
+                icon: getMarkerIcon(num_east, "white"), // Set the number of potholes for the marker
+                label: { text: num_east.toString(), color: 'gray', fontFamily: 'Inter' }, // Display the number of potholes as a label
+                zIndex: 1000
+            });
+
+            westMalaysiaMarker = new google.maps.Marker({
+                position: westMalaysia,
+                map: map,
+                icon: getMarkerIcon(num_west, "white"), // Set the number of potholes for the marker
+                label: { text: num_west.toString(), color: 'gray', fontFamily: 'Inter' }, // Display the number of potholes as a label
+                zIndex: 1000
+            });
+
+        }
+
+        function addStateMalaysiaMarker(map, data) {
+            const stateCoordinates = {
+                "Johor": { lat: 1.4853689, lng: 103.7618154 },
+                "Kedah": { lat: 5.6977618, lng: 100.5372026 },
+                "Kelantan": { lat: 6.1253977, lng: 102.2380715 },
+                "Melaka": { lat: 2.189594, lng: 102.2500868 },
+                "Negeri Sembilan": { lat: 2.7264243, lng: 101.9373483 },
+                "Pahang": { lat: 3.622501, lng: 102.1175029 },
+                "Perak": { lat: 4.5689623, lng: 101.094189 },
+                "Perlis": { lat: 6.4413248, lng: 100.1983993 },
+                "Pulau Pinang": { lat: 5.4163452, lng: 100.3327612 },
+                "Sabah": { lat: 5.9788393, lng: 116.0753155 },
+                "Sarawak": { lat: 2.559750, lng: 113.001089 },
+                "Selangor": { lat: 3.37917, lng: 101.52933 },
+                "Terengganu": { lat: 5.3116918, lng: 103.1322383 },
+                "Wilayah Persekutuan Kuala Lumpur": { lat: 3.139003, lng: 101.686855 },
+                "Labuan Federal Territory": { lat: 5.2802815, lng: 115.2473156 },
+                "Putrajaya": { lat: 2.9264, lng: 101.6964 }
+            };
+
+            // Iterate over each key-value pair in the dictionary
+            for (const state in stateCoordinates) {
+                if (stateCoordinates.hasOwnProperty(state)) {
+                    if (data[state] > 0) {
+                        const coordinates = stateCoordinates[state];
+                        const lat = coordinates.lat;
+                        const lng = coordinates.lng;
+                        var temp = new google.maps.Marker({
+                            position: coordinates,
+                            map: map,
+                            icon: getMarkerIcon(data[state], "gray"), // Set the number of potholes for the marker
+                            label: { text: data[state].toString(), color: 'white', fontFamily: 'Inter' }, // Display the number of potholes as a label
+                            zIndex: 1000
+                        });
+                        stateMalaysiaMarker.push(temp)
+                    }
+                }
+            }
+        }
+
+        function addMarker(map, latitude, longitude, data_obj) {
+            var marker = new google.maps.Marker({
+                position: new google.maps.LatLng(latitude, longitude),
+                map: map,
+                icon: getMarkerIcon(data_obj.annotation.pothole.toString(), data_obj.annotation.isAcknowledged ? "#575757" : "#f02b60", true),
+                label: {
+                    text: data_obj.annotation.pothole.toString(),
+                    color: 'white',
+                    fontSize: '14px',
+                    fontFamily: 'Inter'
+                }
+            });
+            // Open info window when marker is clicked
+            marker.addListener('click', function () {
+                openPanel(`${data_obj.id}`)
+            });
+
+            return marker
+        }
+
+        function removeStateMalaysiaMarker(map) {
+            if (stateMalaysiaMarker.length > 0) {
+                stateMalaysiaMarker.forEach(function (item) {
+                    item.setMap(null)
+                })
+            }
+            stateMalaysiaMarker = []
+        }
+
+        function removeEastWestMalaysiaMarker(map) {
+            if (eastMalaysiaMarker) {
+                eastMalaysiaMarker.setMap(null)
+            }
+            if (westMalaysiaMarker) {
+                westMalaysiaMarker.setMap(null)
+            }
+            eastMalaysiaMarker = null
+            westMalaysiaMarker = null
+        }
+
+        function removeAllAnnotateMarker() {
+            annotateMarker.forEach(function (marker_dict) {
+                marker_dict["marker"].setMap(null)
+            })
+            annotateMarker = []
+        }
+
+        // Get Marker Icon
+        function getMarkerIcon(count, color, isAnnotated = false) {
+            if (isAnnotated) {
+                return {
+                    path: "M32 62c0-17.1 16.3-25.2 17.8-39.7A18 18 0 1 0 14 20a17.7 17.7 0 0 0 .2 2.2C15.7 36.8 32 44.9 32 62z",
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    strokeWeight: 0,
+                    scale: 0.7,
+                    anchor: new google.maps.Point(32, 60),
+                    labelOrigin: new google.maps.Point(32, 20)
+                };
+            } else {
+                return {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    fillColor: color,
+                    fillOpacity: 0.8,
+                    strokeWeight: 0,
+                    scale: (Math.sqrt(count) * 10) + 20 // Adjust the marker size based on the number of potholes
+                };
+            }
+        }
+    </script>
+    <!-- Get Data -->
+    <script>
+        function getAllData(callback) {
+            $.ajax({
+                url: '/api/geo/all',
+                type: 'GET',
+                success: function (response) {
+                    callback(response)
+                },
+            });
+        }
+
+        function getCountryData(callback) {
+            $.ajax({
+                url: '/api/geo/country',
+                type: 'GET',
+                success: function (response) {
+                    callback(response)
+                },
+            });
+        }
+
+        function getStateData(callback) {
+            $.ajax({
+                url: '/api/geo/state',
+                type: 'GET',
+                success: function (response) {
+                    callback(response)
+                },
+            });
+        }
+    </script>
+    <!-- Auto Complete -->
+    <script>
+        function initAutocomplete(map) {
+            $('#loading-message').html("Loading Complete")
+            $('#progress-bar-loader').css("width", "100%")
+            setTimeout(() => {
+                $('#app-loader').addClass('d-none')
+                $('#map').addClass('fade-in-element')
+                $('#map').removeClass('d-none')
+                var input = document.getElementById('place-input');
+                var resultsContainer = document.getElementById('place-results');
+
+                var autocomplete = new google.maps.places.Autocomplete(input);
+
+                // Listen for place changes
+                autocomplete.addListener('place_changed', function () {
+                    // Clear previous results
+                    resultsContainer.innerHTML = '';
+
+                    // Get the selected place
+                    var place = autocomplete.getPlace();
+
+                    // Set the map's bounds to encompass the selected place's viewport (if available)
+                    if (place.geometry.viewport) {
+                        map.fitBounds(place.geometry.viewport);
+                    } else {
+                        map.setCenter(place.geometry.location);
+                        map.setZoom(7); // Adjust the zoom level as desired
+                    }
+                    checkViewport(map)
+                })
+            }, 750)
+        }
+    </script>
+    <!-- Panel -->
+    <script>
+        function closePanel() {
+            $('#info-panel').css("animation", "slideRightFadeOut 0.3s ease-out")
+        }
+
+        function openPanel(annotation_id) {
+            if (!map.getStreetView().getVisible()) {
+                $(document).unbind('keydown')
+                $('#info-panel').css("animation", "slideLeftFadeIn 0.3s ease-out")
+                $('#info-panel').css("display", "block")
+                $('#info-panel-loader').css("display", "flex")
+                $("#info-panel-content").css("display", "none")
+                $.ajax({
+                    url: '/api/annotation/' + annotation_id,
+                    type: 'GET',
+                    success: function (data) {
+                        populate_panel_fields(data)
+                        $('#info-panel-loader').css("display", "none")
+                        $("#info-panel-content").css("display", "block")
+                    }
+                })
+                $(document).on('keydown', () => {
+                    if (event.key === 'Escape' || event.keyCode === 27) {
+                        closePanel()
+                    }
+                })
+            }
+        }
+
+        function populate_panel_fields(data) {
+            //
+            if (data.annotation.isAcknowledged) {
+                $('#panel-head-icon').removeClass("text-danger")
+                $('#panel-head-icon').addClass("text-secondary")
+            } else {
+                $('#panel-head-icon').removeClass("text-secondary")
+                $('#panel-head-icon').addClass("text-danger")
+            }
+            //
+            $('#panel-head-title').html(data.id)
+            //
+            $('#panel-img-container').attr('src', '/api/img/result/' + data.id + ".jpg")
+            //
+            $('#enlarge-image-btn').unbind('click')
+            $('#enlarge-image-btn').click(() => {
+                openImageViewer(data.id)
+            })
+            //
+            $('#panel-main-title').html(data.location.address.city + ", " + data.location.address.state)
+            //
+            var timePast = getTimePast(data.annotation.processTimestamp.display)
+            if (timePast.days > 0) {
+                $('#panel-time-past').html(`${timePast.days} ${timePast.days === 1 ? "day" : "days"} ago`)
+            } else {
+                if (timePast.hours > 0) {
+                    $('#panel-time-past').html(`${timePast.hours} ${timePast.hours === 1 ? "hour" : "hours"} ago`)
+                } else {
+                    if (timePast.minutes > 0) {
+                        $('#panel-time-past').html(`${timePast.minutes} ${timePast.minutes === 1 ? "minute" : "minutes"} ago`)
+                    } else {
+                        if (timePast.seconds > 0) {
+                            $('#panel-time-past').html(`${timePast.seconds} ${timePast.seconds === 1 ? "second" : "seconds"} ago`)
+                        } else {
+                            $('#panel-time-past').html('Just now')
+                        }
+                    }
+                }
+            }
+            //
+            $('#panel-first-address-line').html(`${data.location.address.streetNumber},`)
+            //
+            $('#panel-second-address-line').html(`${data.location.address.postalCode} ${data.location.address.city},`)
+            //
+            $('#panel-third-address-line').html(`${data.location.address.state},`)
+            //
+            $('#panel-fourth-address-line').html(`${data.location.address.country},`)
+            //
+            $('#panel-fifth-address-line').html(`${data.location.latlng.latitude}, ${data.location.latlng.longitude}`)
+            //
+            $("#panel-number-pothole").html(`Number: ${data.annotation.pothole}`)
+            //
+            $('#panel-first-timestamp-message').html(`Image Received on ${data.entryDate.display}`)
+            //
+            $('#panel-second-timestamp-message').html(`Image Processed on ${data.annotation.processTimestamp.display}`)
+            //
+        }
+
+        function getTimePast(dateString) {
+            const date = moment(dateString, "DD MMMM YYYY hh:mmA");
+            const currentDate = moment();
+
+            const timeDifference = currentDate.diff(date);
+
+            const duration = moment.duration(timeDifference);
+
+            return {
+                days: duration.days(),
+                hours: duration.hours(),
+                minutes: duration.minutes(),
+                seconds: duration.seconds()
+            };
+        }
+
+        $('#info-panel').on('animationend', () => {
+            var animation_name = $('#info-panel').css("animation-name")
+
+            switch (animation_name) {
+                case "slideRightFadeOut":
+                    $("#info-panel").css("display", "none")
+            }
+        })
+    </script>
+    <!-- Image Viewer -->
+    <script>
+        function openImageViewer(id) {
+            tempImageAnnotationID = id
+            closePanel()
+            $('#image-viewer').css('animation', 'fadeInAnimation 0.2s ease-out')
+            $('#image-viewer').css('display', 'flex')
+            $("#image-viewer-content").attr('src', '/api/img/result/' + id + ".jpg")
+            //
+            $("#download-image-btn").unbind('click')
+            $("#download-image-btn").click(() => {
+                fetch('/api/img/result/' + id + ".jpg")
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Failed to download the image ...');
+                        }
+                        return response.blob();
+                    })
+                    .then(blob => {
+                        const url = URL.createObjectURL(blob);
+                        const anchor = document.createElement('a');
+                        anchor.href = url;
+                        anchor.download = `${id}.jpg`;
+                        anchor.click();
+                        URL.revokeObjectURL(url);
+                    })
+                    .catch(error => {
+                        console.error('Error fetching the image:', error);
+                    });
+            })
+            //
+            $(document).on('keydown', () => {
+                if (event.key === 'Escape' || event.keyCode === 27) {
+                    closeImageViewer()
+                    $(document).unbind('keydown')
+                }
+            })
+        }
+
+        function closeImageViewer() {
+            $('#image-viewer').css('animation', 'fadeOutAnimation 0.2s linear')
+        }
+
+        $('#image-viewer').on('animationend', () => {
+            var animation_name = $('#image-viewer').css("animation-name")
+            switch (animation_name) {
+                case "fadeOutAnimation":
+                    $("#image-viewer").css("display", "none")
+                    openPanel(tempImageAnnotationID)
+                    tempImageAnnotationID = ""
+            }
+        })
+    </script>
+    <style>
+        * {
+            outline: none;
+        }
+
+        #enlarge-image-btn {
+            transition: all 0.2s ease-in;
+        }
+
+        #enlarge-image-btn:hover {
+            background-color: #ffffff !important;
+        }
+
+        #close-panel-btn,
+        #close-image-viewer-btn i {
+            transition: all 0.2s ease-in;
+        }
+
+        #close-panel-btn:hover,
+        #close-image-viewer-btn:hover i {
+            color: rgb(172, 172, 172) !important;
+        }
+
+        .text-secondary-info {
+            color: #b7b7b7;
+        }
+
+        .fade-in-element {
+            opacity: 0;
+            animation: fadeInAnimation 1s forwards;
+        }
+
+        @keyframes fadeInAnimation {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes fadeOutAnimation {
+            from {
+                opacity: 1;
+            }
+
+            to {
+                opacity: 0;
+            }
+        }
+
+        @keyframes slideLeftFadeIn {
+            from {
+                left: -20%;
+                opacity: 0%;
+            }
+
+            to {
+                left: 1.5%;
+                opacity: 100%;
+            }
+        }
+
+        @keyframes slideRightFadeOut {
+            from {
+                left: 1.5%;
+                opacity: 100%;
+            }
+
+            to {
+                left: -20%;
+                opacity: 0%;
+            }
+        }
+    </style>
+</body>
+
+</html>

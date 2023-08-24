@@ -18,6 +18,25 @@
         crossorigin="anonymous"></script>
     <title>SentinelVision</title>
     <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
+    <style>
+        .login-field {
+            background-color: #35353580 !important;
+            color: white !important;
+            border: 1px solid #9b9b9b4d !important;
+        }
+
+        .login-field::placeholder {
+            color: transparent !important;
+        }
+
+        .login-field:focus {
+            box-shadow: 0 0 0 0.25rem #389cfe30;
+        }
+
+        .login-label {
+            color: #b7b7b7 !important;
+        }
+    </style>
 </head>
 
 <body class="bg-dark d-flex flex-column justify-content-center align-items-center" style="width: 100vw;height: 100vh">
@@ -26,20 +45,32 @@
         <p class="text-light" style="font-family: Poppins;font-size: 1.4rem">Welcome Back!</p>
         <div class="mt-7 d-flex flex-column" style="width: 150%;gap: 10px">
             <div class="form-floating">
-                <input type="email" style="height: 55px;" class="form-control" id="login-email-field"
+                <input type="email" style="height: 55px;" class="form-control login-field" id="login-email-field"
                     placeholder="name@example.com">
-                <label for="login-email-field" class="text-sm">Email address</label>
+                <label for="login-email-field" class="text-sm login-label">Email address</label>
             </div>
             <div class="form-floating mt-2 mb-8">
-                <input type="password" style="height: 55px;" class="form-control form-input" id="login-password-field"
-                    placeholder="Password">
-                <label for="login-password-field" class="text-sm">Password</label>
+                <input type="password" style="height: 55px;" class="form-control form-input login-field"
+                    id="login-password-field" placeholder="Password">
+                <label for="login-password-field" class="text-sm login-label">Password</label>
+                <div class="d-flex flex-row justify-content-end">
+                    <div class="form-check mt-3">
+                        <input class="form-check-input login-field" type="checkbox" value="" id="showPasswordCheckbox">
+                        <label class="form-check-label login-label" for="showPasswordCheckbox">
+                            Show Password
+                        </label>
+                    </div>
+                </div>
+
             </div>
             <button id="login-button" class="btn btn-success" disabled onclick="login()">
                 <p id="login-title">Login</p>
                 <div id="login-loader" class="spinner-border text-success text-sm"
                     style="display:none;width: 20px;height: 20px" role="status">
                 </div>
+            </button>
+            <button class="btn btn-outline-light mt-1" onclick="window.location.href='/public'">
+                <p class="text-sm">Back to Map</p>
             </button>
         </div>
     </section>
@@ -48,11 +79,25 @@
         <i class="bi bi-x-circle-fill text-light text-sm"></i>
         <p class="text-light" style="font-size: 15px;">Incorrect credentials, please try again!</p>
     </div>
+    <div id="logout-success-message" class="bg-success px-4 py-3 rounded align-items-center"
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 3%; right: 2%; gap: 10px; display: none">
+        <i class="bi bi-check-circle-fill text-light text-sm"></i>
+        <p class="text-light" style="font-size: 15px;">Logout successfully!</p>
+    </div>
     <div class="progress"
         style="position: fixed; top: 0px; left: 0px;width: 100vw;height: 0.2%; border-radius: 0px; background-color:transparent">
         <div id="progress-bar-status" class="progress-bar bg-success" role="progressbar" style="width: 0%"
             aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
+    <script>
+        $("#showPasswordCheckbox").change(function () {
+            if ($(this).is(":checked")) {
+                $("#login-password-field").attr("type", "text");
+            } else {
+                $("#login-password-field").attr("type", "password");
+            }
+        })
+    </script>
     <script>
         var numLoginFailed = 0
 
@@ -72,7 +117,29 @@
             }
         })
 
+        // Get the query string from the current URL
+        const queryString = window.location.search;
+
+        // Create a URLSearchParams object to parse the query string
+        const params = new URLSearchParams(queryString);
+
+        // Check if the 'logout' parameter is present and has the value 'true'
+        if (params.has('logout') && params.get('logout') === 'true') {
+            $('#logout-success-message').css("display", "flex")
+            $('#logout-success-message').css("animation", "slideLeftFadeIn 0.5s forwards")
+            setTimeout(() => {
+                $('#logout-success-message').css("display", "none")
+            }, 5000)
+        }
+
+        if (window.location.search.includes('logout=true')) {
+            // Remove the 'logout' parameter from the URL without reloading
+            const newURL = window.location.href.replace('?logout=true', '');
+            window.history.replaceState({}, document.title, newURL);
+        }
+
         function login() {
+            $('#logout-success-message').css("display", "none")
             $('#login-button').removeClass("btn-success")
             $('#login-button').css("background-color", "gray")
             $("#login-button").attr("disabled", true)

@@ -17,6 +17,7 @@ from datetime import timedelta, datetime
 from django.db.models.functions import ExtractHour, TruncHour
 from django_q.tasks import async_task
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import User
 
 def serve_html(request, path=None):
     # Construct the absolute file path
@@ -34,12 +35,14 @@ def serve_html(request, path=None):
                     file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "dashboard.html")
                 elif (path == "setting"):
                     file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "setting.html")
+                elif (path == "user"):
+                    file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "user.html")
                 else:
                     return HttpResponseRedirect("/app/")
         except KeyError:
-            return redirect("login")
+            return redirect("render_public")
     else:
-        return redirect("login")
+        return redirect("render_public")
     # Read the file contents
     with open(file_path, 'r') as file:
         file_contents = file.read()
@@ -447,7 +450,7 @@ def serve_login_page(request):
                 return HttpResponseRedirect("/app/")
         
         logout(request)
-        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "login.html")
+        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html","public", "login.html")
         # Read the file contents
         with open(file_path, 'r') as file:
             file_contents = file.read()
@@ -472,4 +475,34 @@ def serve_login_page(request):
 
 def logout_user(request):
     logout(request)
-    return HttpResponseRedirect('/app/login/')
+    return HttpResponseRedirect('/app/login?logout=true')
+
+def serve_public_html(request, path=None):
+    session_id = request.COOKIES.get('sessionid')
+    if (session_id):
+        session = request.session
+        if session.get_expiry_date() > timezone.now():
+            return HttpResponseRedirect("/app/")
+    
+    logout(request)
+    file_path = None
+    file_contents = None
+    if (path is None):
+        file_path = os.path.join(settings.VIEW_STATIC_ROOT, "html", "public","index.html")
+    elif (path == "login"):
+        return redirect("login")
+    # Read the file contents
+    with open(file_path, 'r') as file:
+        file_contents = file.read()
+    # Return the file contents as an HTTP response
+    return HttpResponse(file_contents, content_type='text/html')
+
+
+@csrf_exempt
+def create_user(request):
+    if (request.method == "POST"):
+        data = json.loads(request.body)
+        user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'],is_superuser=False, first_name=data['firstName'], last_name=data['lastName'],is_staff=True)
+        return HttpResponse()
+    return HttpResponseNotFound()
+    
