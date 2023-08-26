@@ -408,9 +408,9 @@ def serve_statistic_data(request):
         location = GeoLocationGoogle.objects.get(pk=annotation.uuid)
         state = location.state
         if state == "Federal Territory of Kuala Lumpur":
-            out["total_potholes_by state"]["Wilayah Persekutuan Kuala Lumpur"] += 1
+            out["total_potholes_by state"]["Wilayah Persekutuan Kuala Lumpur"] += annotation.numPothole
         else:
-            out["total_potholes_by state"][state] +=  1
+            out["total_potholes_by state"][state] +=  annotation.numPothole
     
     # Total potholes by day past month
     total_days = 30
