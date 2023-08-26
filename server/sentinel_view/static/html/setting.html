@@ -257,6 +257,14 @@
                     $('#initial-zoom-level-input').val(initialSetting.MAP_INITIAL_ZOOM_LEVEL)
                     $('#maximum-zoom-level-input').val(initialSetting.MAP_MAXIMUM_ZOOM_LEVEL)
                     $('#minimum-zoom-level-input').val(initialSetting.MAP_MINIMUM_ZOOM_LEVEL)
+
+                    if (initialSetting.NUM_IMAGE_THRESHOLD <= 1) {
+                        $('#decreaseBtn-image-threshold').attr("disabled", true)
+                    }
+
+                    if (initialSetting.NUM_IMAGE_THRESHOLD >= 100) {
+                        $('#increaseBtn-image-threshold').attr("disabled", true)
+                    }
                 },
                 error: function (xhr, status, error) {
                 }
@@ -269,6 +277,14 @@
             $('#initial-zoom-level-input').val(7)
             $('#maximum-zoom-level-input').val(16)
             $('#minimum-zoom-level-input').val(6)
+            $('#decreaseBtn-image-threshold').attr("disabled", false)
+            $("#increaseBtn-image-threshold").attr("disabled", false)
+            $("#decreaseBtn-min-zoom-level").attr("disabled", false)
+            $("#increaseBtn-min-zoom-level").attr("disabled", false)
+            $("#decreaseBtn-max-zoom-level").attr("disabled", false)
+            $("#increaseBtn-max-zoom-level").attr("disabled", false)
+            $("#decreaseBtn-initial-zoom-level").attr("disabled", false)
+            $("#increaseBtn-initial-zoom-level").attr("disabled", false)
             save_setting()
         }
 

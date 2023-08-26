@@ -226,9 +226,14 @@
         </section>
     </section>
     <div id="register-success-message" class="bg-success px-4 py-3 rounded align-items-center"
-        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; right: 45%; gap: 10px; display: none">
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none">
         <i class="bi bi-check-circle-fill text-light text-sm"></i>
         <p class="text-light" style="font-size: 15px;">Account Registered Successfully!</p>
+    </div>
+    <div id="register-failure-message" class="bg-danger px-4 py-3 rounded align-items-center"
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none">
+        <i class="bi bi-dash-circle-fill text-light text-sm"></i>
+        <p class="text-light" style="font-size: 15px;" id="failure-message"></p>
     </div>
     <script>
         // Get the query string from the current URL
@@ -237,12 +242,20 @@
         // Create a URLSearchParams object to parse the query string
         const params = new URLSearchParams(queryString);
 
-        // Check if the 'logout' parameter is present and has the value 'true'
         if (params.has('isSuccess') && params.get('isSuccess') === 'true') {
             $("#register-success-message").css("display", "flex")
             $("#register-success-message").css("animation", "fadeIn 0.5s forwards")
             setTimeout(() => {
                 $("#register-success-message").css("display", "none")
+            }, 5000)
+        }
+
+        if (params.has('isError')) {
+            $("#register-failure-message").css("display", "flex")
+            $("#register-failure-message").css("animation", "fadeIn 0.5s forwards")
+            $('#failure-message').html(params.get('isError'))
+            setTimeout(() => {
+                $("#register-failure-message").css("display", "none")
             }, 5000)
         }
 
@@ -252,6 +265,10 @@
             window.history.replaceState({}, document.title, newURL);
         }
 
+        if (window.location.search.includes('isError=')) {
+            const newURL = window.location.href.replace(/[\?&]isError=[^&]+/, '');
+            window.history.replaceState({}, document.title, newURL);
+        }
 
         function createUser() {
             const password = $("#confirmPassword").val();
@@ -272,6 +289,9 @@
                 success: function (response) {
                     window.location.href = "/app/user?isSuccess=true"
                 },
+                error: function (response) {
+                    window.location.href = `/app/user?isError=${encodeURIComponent(response.responseText)}`
+                }
             });
         }
 

@@ -18,6 +18,7 @@ from django.db.models.functions import ExtractHour, TruncHour
 from django_q.tasks import async_task
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
 
 def serve_html(request, path=None):
     # Construct the absolute file path
@@ -508,7 +509,10 @@ def serve_public_html(request, path=None):
 def create_user(request):
     if (request.method == "POST"):
         data = json.loads(request.body)
-        user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'],is_superuser=False, first_name=data['firstName'], last_name=data['lastName'],is_staff=True)
-        return HttpResponse()
+        try:
+            user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'],is_superuser=False, first_name=data['firstName'], last_name=data['lastName'],is_staff=True)
+            return HttpResponse
+        except IntegrityError as e:
+            return HttpResponse("Account Already Exists!", content_type="text/plain", status=400)
     return HttpResponseNotFound()
     
