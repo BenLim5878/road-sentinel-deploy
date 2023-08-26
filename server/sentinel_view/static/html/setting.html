@@ -18,6 +18,17 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.min.js"
         integrity="sha384-cVKIPhGWiC2Al4u+LWgxfKTRIcfu0JTxR+EQDz/bgldoEyl4H0zUF0QKbrJ0EcQF"
         crossorigin="anonymous"></script>
+    <style>
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+
+            100% {
+                opacity: 1;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-dark">
@@ -237,6 +248,11 @@
             </div>
         </div>
     </div>
+    <div id="setting-success-message" class="bg-success px-4 py-3 rounded align-items-center"
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none">
+        <i class="bi bi-check-circle-fill text-light text-sm"></i>
+        <p class="text-light" style="font-size: 15px;">Setting Updated Successfully!</p>
+    </div>
     <script>
         const defaultSetting = {
             "NUM_IMAGE_THRESHOLD": 10,
@@ -296,6 +312,8 @@
             }
         }
 
+        var numSettingSaved = 0
+
         function save_setting() {
             var updated_setting = {
                 "NUM_IMAGE_THRESHOLD": $('#image-threshold-input').val(),
@@ -315,6 +333,16 @@
                     $('#initial-zoom-level-warning-text').hide()
                     $('#maximum-zoom-level-warning-text').hide()
                     $('#minimum-zoom-level-warning-text').hide()
+                    //
+                    numSettingSaved++
+                    $("#setting-success-message").css("display", "flex")
+                    $("#setting-success-message").css("animation", "fadeIn 0.5s forwards")
+                    setTimeout(() => {
+                        numSettingSaved--
+                        if (numSettingSaved == 0) {
+                            $("#setting-success-message").css("display", "none")
+                        }
+                    }, 5000)
                 },
                 error: function (xhr, status, error) {
                 }

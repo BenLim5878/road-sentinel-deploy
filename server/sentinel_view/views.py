@@ -511,7 +511,7 @@ def create_user(request):
         data = json.loads(request.body)
         try:
             user = User.objects.create_user(username=data['email'], email=data['email'], password=data['password'],is_superuser=False, first_name=data['firstName'], last_name=data['lastName'],is_staff=True)
-            return HttpResponse
+            return HttpResponse()
         except IntegrityError as e:
             return HttpResponse("Account Already Exists!", content_type="text/plain", status=400)
     return HttpResponseNotFound()
