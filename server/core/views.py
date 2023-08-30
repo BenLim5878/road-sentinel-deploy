@@ -91,20 +91,21 @@ def check_original_image_folder(destination_path):
     if (image_count >= SystemConfiguration.objects.first().NUM_IMAGE_THRESHOLD):
         annotations = run_yolo()
         delete_original_content(destination_path)
-        if len(annotations) > 0:
-            process_timestamp_str = annotations['folder_name']
-            process_timestamp_obj = datetime.datetime.strptime(process_timestamp_str, "%Y-%m-%d_%H.%M.%S.%f")
-            for annotation in annotations['annotations']:
-                img_uid = annotation['img_uid']
-                num_pothole = annotation['num_pothole']
-                user_image = UserImage.objects.get(uuid=img_uid)
-                image_annotation = ImageAnnotation(
-                    uuid = user_image,
-                    processTimestamp = process_timestamp_obj,
-                    numPothole = num_pothole
-                )
-                image_annotation.save()
-       
+        if (annotations):
+            if len(annotations) > 0:
+                process_timestamp_str = annotations['folder_name']
+                process_timestamp_obj = datetime.datetime.strptime(process_timestamp_str, "%Y-%m-%d_%H.%M.%S.%f")
+                for annotation in annotations['annotations']:
+                    img_uid = annotation['img_uid']
+                    num_pothole = annotation['num_pothole']
+                    user_image = UserImage.objects.get(uuid=img_uid)
+                    image_annotation = ImageAnnotation(
+                        uuid = user_image,
+                        processTimestamp = process_timestamp_obj,
+                        numPothole = num_pothole
+                    )
+                    image_annotation.save()
+        
 def delete_original_content(destination_path):
     file_list = os.listdir(destination_path)
     for file_name in file_list:

@@ -2,6 +2,12 @@ import subprocess
 import os
 from datetime import datetime
 
+def has_files(directory):
+    for root, dirs, files in os.walk(directory):
+        if files:  # If the files list is not empty
+            return True
+    return False
+
 def get_current_date_time():
     # Get the current date and time
     current_time = datetime.now()
@@ -14,11 +20,13 @@ def run_yolo():
     weight_path = os.path.join(script_dir, 'yolov7', 'best.pt')
     output_folder = f"{script_dir}/../image_output"
     folder_name = get_current_date_time()
-    # command = f"py {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
-    command = f"python3.9 {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
-    subprocess.run(command, shell=True)
-    annotations = yolo_post_processing(output_folder,folder_name)
-    return annotations
+    if (has_files(f'{script_dir}/../tmp_img/')):
+        # command = f"py {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
+        command = f"python3.9 {script_path} --weights {weight_path} --conf 0.25 --img-size 640 --source {script_dir}/../tmp_img/ --project {output_folder} --name {folder_name} --save-txt"
+        subprocess.run(command, shell=True)
+        annotations = yolo_post_processing(output_folder,folder_name)
+        return annotations
+    return None
     
 def yolo_post_processing(output_folder, folder_name):
     image_folder = f"{output_folder}/{folder_name}"
