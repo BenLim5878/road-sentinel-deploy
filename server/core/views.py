@@ -11,11 +11,31 @@ import datetime
 import requests
 from sentinel_view.models import SystemConfiguration
 from django_q.tasks import async_task
+from django.utils import timezone
 
+def check_upload_validity(request):
+    current_time = timezone.localtime(timezone.now())    
+    
+    current_hour = current_time.hour
+    if 8 <= current_hour < 18:
+        return True
+    else:
+        return False
+
+def upload_validity(request):
+    isValid = check_upload_validity(request)
+    if (isValid):
+        return JsonResponse({'isValid':True, 'message': 'Session is established.'})
+    else:
+         return JsonResponse({'isValid':False, 'message': 'Please upload run the application on the specified time (8am - 6pm), or session has expired.'})
+        
 
 @csrf_exempt
 def process_image(request):
     if request.method == 'POST' and request.FILES.get('image'):
+        
+        if (not check_upload_validity(request)):
+            return JsonResponse({'message':'Please upload run the application on the specified time (8am - 6pm), or session has expired.'})
         
         # GPS coordinate checking
         if request.POST.get('latitude', None) is not None and request.POST.get('longitude', None) is not None:
@@ -32,18 +52,14 @@ def process_image(request):
         # Process the image
         image = Image.open(image_file)
         image = image.convert('RGB')
-        processed_image = process_image_function(image)
         
         # Run image pipline
-        async_task(save_incoming_image, processed_image, latitude, longitude)
+        async_task(save_incoming_image, image, latitude, longitude)
         
         return JsonResponse({'message': 'Image processed and saved successfully.'})
     else:
         return JsonResponse({'message': 'Invalid request.'})
     
-def process_image_function(image):
-    return image
-
 def save_incoming_image(image, latitude, longitude):
     # Define the destination path
     destination_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tmp_img')

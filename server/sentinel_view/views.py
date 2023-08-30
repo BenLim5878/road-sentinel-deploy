@@ -469,7 +469,7 @@ def serve_login_page(request):
             login(request, user)
             request.session.set_expiry(24 * 60 * 60)
             # Update user last login field
-            user.last_login = timezone.now()
+            user.last_login = timezone.localtime(timezone.now())
             user.save()
             return JsonResponse({"id": user.id,"status":True})
         else:

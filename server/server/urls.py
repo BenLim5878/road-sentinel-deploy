@@ -15,7 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.urls import path, re_path
-from core.views import process_image
+from core.views import process_image, upload_validity
 from img_api.views import get_image
 from sentinel_view.views import serve_html,serve_img,serve_css,serve_geo_data, serve_geo_data_country, serve_geo_data_state, serve_system_configuration_setting,serve_annotation_data,serve_statistic_data,serve_login_page,logout_user,serve_public_html, create_user
 from test_api.views import process_latlong, create_default_user
@@ -25,6 +25,7 @@ handler404 = 'sentinel_view.views.page_not_found'
 
 urlpatterns = [
     path('uploads', process_image, name='process_image'),
+    path('uploads/valid', upload_validity, name='uplaod_validity'),
     path('api/img/result/<str:filename>', get_image, name='get_image'),
     re_path(r'^app/(?:(?P<path>.+)/)?$', serve_html, name='render_sentinel'),
     path('app/login', serve_login_page, name="login"),
