@@ -112,10 +112,13 @@
                     getAllData((response) => {
                         if (annotateMarker.length == 0) {
                             response.forEach((obj) => {
-                                if (obj.annotation.pothole > 0) {
-                                    marker = addMarker(map, obj.location.latlng.latitude, obj.location.latlng.longitude, obj)
-                                    annotateMarker.push({ "id": obj.id, "marker": marker })
+                                if (obj.isAnnotated) {
+                                    if (obj.annotation.pothole > 0) {
+                                        marker = addMarker(map, obj.location.latlng.latitude, obj.location.latlng.longitude, obj)
+                                        annotateMarker.push({ "id": obj.id, "marker": marker })
+                                    }
                                 }
+
                             })
                             removeEastWestMalaysiaMarker()
                             removeStateMalaysiaMarker()
