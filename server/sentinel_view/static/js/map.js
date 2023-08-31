@@ -23,7 +23,6 @@ function initMap() {
             map = new google.maps.Map(document.getElementById('map'), {
                 center: { lat: 4.228226, lng: 109.174870 },
                 mapTypeControl: false,
-                gestureHandling: "greedy",
                 zoom: setting.MAP_INITIAL_ZOOM_LEVEL,
                 minZoom: setting.MAP_MINIMUM_ZOOM_LEVEL, // Set the minimum allowed zoom level
                 maxZoom: setting.MAP_MAXIMUM_ZOOM_LEVEL, // Set the maximum allowed zoom level
