@@ -36,14 +36,21 @@
         .login-label {
             color: #b7b7b7 !important;
         }
+
+        @media (max-width: 576px) {
+
+            #login-main-content-container {
+                width: 120% !important;
+            }
+        }
     </style>
 </head>
 
-<body class="bg-dark d-flex flex-column justify-content-center align-items-center" style="width: 100vw;height: 100vh">
-    <img style="width: 3.5%; margin-top: -5%" src="/api/img/resource/app-icon.png">
+<body class="bg-dark d-flex flex-column justify-content-center align-items-center" style="width: 100dvw;height: 100dvh">
+    <img style="width: 3.5rem;" src="/api/img/resource/app-icon.png">
     <section class="d-flex flex-column align-items-center" style="margin-top: 20px;">
         <p class="text-light" style="font-family: Poppins;font-size: 1.4rem">Welcome Back!</p>
-        <div class="mt-7 d-flex flex-column" style="width: 150%;gap: 10px">
+        <div id="login-main-content-container" class="mt-7 d-flex flex-column" style="width: 150%; gap: 10px">
             <div class="form-floating">
                 <input type="email" style="height: 55px;" class="form-control login-field" id="login-email-field"
                     placeholder="name@example.com">
