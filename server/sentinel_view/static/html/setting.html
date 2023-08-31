@@ -31,10 +31,10 @@
     </style>
 </head>
 
-<body class="bg-dark">
+<body class="bg-dark d-flex flex-column" style="height: 100dvh;width: 100vw;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
-        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
-        <button class="d-flex flex-row align-items-center" style="gap: 10px;background-color:transparent"
+        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);z-index: 9999;width:100dvw">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
             onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
                 <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
@@ -55,7 +55,8 @@
                     </clipPath>
                 </defs>
             </svg>
-            <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
+            <h4 class="d-none d-md-block" style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision
+            </h4>
         </button>
         <div>
             <button class="btn btn-light" onclick="window.location.href='/app/'">
@@ -69,7 +70,19 @@
             </button>
         </div>
     </header>
-    <section class="d-flex flex-row justify-content-between" style="width: 100%;height: 92vh">
+    <section class="d-flex d-md-none flex-grow p-5" style="gap: 10px;justify-content:space-evenly">
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/dashboard/'">
+            Statistics
+        </button>
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/user/'">
+            Users
+        </button>
+        <button class="btn btn-primary" style="width:100%" onclick="window.location.href='/app/setting/'">
+            Settings
+        </button>
+    </section>
+    <section class="d-flex flex-row justify-content-between flex-grow-1"
+        style="width: 100%;overflow-y:scroll;margin-bottom: 20px">
         <div class="p-5" style="width: 1450px;margin: 0px auto;">
             <h3 class="text-light mb-7" style="font-weight: 500">System Configuration</h3>
             <div class="card mb-4" style="background-color: #232430;border:none">
@@ -81,7 +94,20 @@
                 </div>
                 <div class="card-body pt-0 px-10">
                     <form>
-                        <div class="form-group d-flex flex-row justify-content-between align-items-center">
+                        <style>
+                            @media (max-width: 970px) {
+                                #form-container {
+                                    flex-direction: column !important;
+                                }
+
+                                .form-container-input {
+                                    width: initial !important;
+                                    margin-top: 15px !important;
+                                }
+                            }
+                        </style>
+                        <div id="form-container"
+                            class="form-group d-flex flex-row justify-content-between align-items-center">
                             <div>
                                 <p class="text-white">Image Process Threshold</p>
                                 <p class="setting-description" style="font-weight: 300;">Specify the amount of image the
@@ -89,7 +115,7 @@
                                     detection
                                     operation</p>
                             </div>
-                            <div class="input-group" style="width: 15%;">
+                            <div class="form-container-input input-group" style="width: 15%;">
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-danger"
                                         style="border-radius: 0.375rem 0rem 0rem 0.375rem"
@@ -114,7 +140,8 @@
                 </div>
                 <div class="card-body pt-0 px-10">
                     <form class="d-flex flex-column" style="gap: 30px;">
-                        <div class="form-group d-flex flex-row justify-content-between align-items-center">
+                        <div id="form-container"
+                            class="form-group d-flex flex-row justify-content-between align-items-center">
                             <div>
                                 <p class="text-white">Minimum Zoom Level</p>
                                 <p class="setting-description" style="font-weight: 300;">Specify the minimum amount of
@@ -126,7 +153,7 @@
                                     level and must below or equals to initial zoom level !
                                 </p>
                             </div>
-                            <div class="input-group" style="width: 15%;">
+                            <div class="input-group form-container-input" style="width: 15%;">
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-danger"
                                         style="border-radius: 0.375rem 0rem 0rem 0.375rem"
@@ -141,7 +168,8 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="form-group d-flex flex-row justify-content-between align-items-center">
+                        <div id="form-container"
+                            class="form-group d-flex flex-row justify-content-between align-items-center">
                             <div>
                                 <p class="text-white">Maximum Zoom Level</p>
                                 <p class="setting-description" style="font-weight: 300;">Specify the maximum amount of
@@ -153,7 +181,7 @@
                                     level and must above or equals to initial zoom level!
                                 </p>
                             </div>
-                            <div class="input-group" style="width: 15%;">
+                            <div class="input-group form-container-input" style="width: 15%;">
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-danger"
                                         style="border-radius: 0.375rem 0rem 0rem 0.375rem"
@@ -168,7 +196,8 @@
                                 </span>
                             </div>
                         </div>
-                        <div class="form-group d-flex flex-row justify-content-between align-items-center">
+                        <div id="form-container"
+                            class="form-group d-flex flex-row justify-content-between align-items-center">
                             <div>
                                 <p class="text-white">Initial Zoom Level</p>
                                 <p class="setting-description" style="font-weight: 300;">Specify the initial zoom level
@@ -178,7 +207,7 @@
                                     Initial zoom level must between specified maximum and minimum zoom level !
                                 </p>
                             </div>
-                            <div class="input-group" style="width: 15%;">
+                            <div class="input-group form-container-input" style="width: 15%;">
                                 <span class="input-group-btn">
                                     <button type="button" class="btn btn-danger"
                                         style="border-radius: 0.375rem 0rem 0rem 0.375rem"
@@ -198,16 +227,15 @@
                 <div class="my-5 d-flex flex-row justify-content-between px-5">
                     <button class="btn btn-outline-info" data-bs-toggle="modal"
                         data-bs-target="#restore-default-confirmation-modal">
-
-                        Restore Default
+                        Restore
                     </button>
                     <button id="save-button" class="btn btn-outline-success" disabled style="width: 150px"
                         onclick="save_setting()">Save</button>
                 </div>
             </div>
         </div>
-        <section class=" d-flex flex-column p-5"
-            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397)">
+        <section class="d-none d-md-flex flex-column p-5"
+            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397);height: ">
             <button class="btn btn-outline-secondary" onclick="window.location.href='/app/dashboard/'">
                 Statistics
             </button>
