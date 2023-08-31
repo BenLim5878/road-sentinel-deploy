@@ -103,8 +103,8 @@
                     width: 100vw !important;
                     border-top: 1px solid #838383;
                     overflow-y: scroll;
-                    height: 100%;
-                    padding-bottom: 3rem;
+                    height: 100dvh;
+                    padding-bottom: 5rem;
                 }
 
                 #info-panel-content {
@@ -113,9 +113,9 @@
                 }
             }
         </style>
-        <section style="position:absolute;z-index: 10000;top: 11%;left: 1.5%;display:none" class="w-100"
+        <section style="position:absolute;z-index: 10000;top: 11%;left: 1.5%;display:none" class="bg-dark w-100"
             id="info-panel">
-            <div class="bg-dark rounded pb-8" id="info-panel-content" style="height: fit-content; box-shadow:
+            <div class="rounded pb-8" id="info-panel-content" style="box-shadow:
             0 0 25px 3px #0000008c">
                 <div>
                     <button onclick="closePanel()" id="close-panel-btn" style="background-color: transparent;">

@@ -22,7 +22,7 @@
     <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
 </head>
 
-<body class="bg-dark" style="overflow: hidden;">
+<body class="bg-dark d-flex flex-column" style="height: 100dvh;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
         style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
         <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
@@ -46,9 +46,10 @@
                     </clipPath>
                 </defs>
             </svg>
-            <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
+            <h4 class="d-none d-md-block" style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision
+            </h4>
         </button>
-        <div class="container">
+        <div class="container d-none d-sm-block">
             <div class="form-group">
                 <input type="text" id="place-input" class="form-control"
                     placeholder="Search by place name, street, state, or country">
@@ -67,7 +68,12 @@
             </button>
         </div>
     </header>
-    <div style="width:100%; height: 92vh;overflow:hidden">
+    <div class="flex-grow-1 d-flex flex-column" style="width:100%;overflow:hidden">
+        <div style="position: absolute;position: absolute; z-index: 1000; width: 80%; margin: 1.5% 3% 0%">
+            <input type=" text" id="place-input-sm" class="form-control d-none d-sm-none"
+                placeholder="Search by places">
+            <div class="bg-dark" id="place-results-sm"></div>
+        </div>
         <!-- App Loader -->
         <div style="width: 25%;height:fit-content;margin:auto;margin-top: 20%;" id="app-loader">
             <p class="text-white mb-5" style="font-size:16px;" id="loading-message">Initializing...</p>
@@ -82,10 +88,10 @@
         </div>
         <!-- Image Viewer -->
         <div id="image-viewer"
-            style="display:none;position:absolute;width: 100%;height: 92.5vh;top: 7.6%; left:0px;background-color: #000000d9;z-index:2;overflow:hidden">
+            style="display:none;position:absolute;width: 100%;height: 92.5vh;top: 7.6%; left:0px;background-color: #000000d9;z-index:9998;overflow:hidden">
             <div onclick="closeImageViewer()" style="position:absolute;width:100%; height: 100%;z-index: 1"></div>
             <button onclick="closeImageViewer()" id="close-image-viewer-btn"
-                style="background-color: transparent;position:absolute;margin-left:97vw;margin-top:1vh;z-index:3">
+                style="background-color: transparent; position: absolute; right: 1vw; top: 1vh; z-index: 3;">
                 <i class="bi bi-x text-light" style="font-size: 33px;"></i>
             </button>
             <div class="align-self-center d-flex flex-column" style="margin:auto;gap: 4vh;position:relative;z-index:2">
@@ -94,8 +100,28 @@
             </div>
         </div>
         <!-- Info Panel -->
-        <section style="position:absolute;z-index: 1;top: 11%;left: 1.5%;display:none" id="info-panel">
-            <div class="bg-dark rounded pb-8" style="width: 22vw; height: fit-content; box-shadow:
+        <style>
+            @media (max-width: 576px) {
+
+                #info-panel {
+                    top: 4.4rem !important;
+                    left: 0 !important;
+                    width: 100vw !important;
+                    border-top: 1px solid #838383;
+                    overflow-y: scroll;
+                    height: 100dvh;
+                    padding-bottom: 5rem;
+                }
+
+                #info-panel-content {
+                    box-shadow: none !important;
+                    border-radius: 0px !important;
+                }
+            }
+        </style>
+        <section style="position:absolute;z-index: 10000;top: 11%;left: 1.5%;display:none" class="bg-dark w-100"
+            id="info-panel">
+            <div class="rounded pb-8" id="info-panel-content" style="box-shadow:
             0 0 25px 3px #0000008c">
                 <div>
                     <button onclick="closePanel()" id="close-panel-btn" style="background-color: transparent;">
@@ -103,7 +129,7 @@
                             style="font-size: 25px;position:absolute; margin-left:90%; margin-top: -3%"></i>
                     </button>
                     <div id="info-panel-loader" class="flex-column justify-content-center align-items-center"
-                        style="height: 62vh;">
+                        style="height: 62vh">
                         <h5 class="text-light">Loading ...</h5>
                     </div>
                     <div id="info-panel-content" class="px-5" style="margin-top: -2%">
@@ -162,11 +188,10 @@
                                     <p id="panel-second-timestamp-message" class="text-secondary-info">Image Processed
                                         on 1 January 1900 00:00:00</p>
                                 </div>
+                                <button id="panel-acknowledge-button" class="btn"
+                                    style="width: 100%;margin-top: 10%">Acknowledge</button>
                             </div>
                         </div>
-                        <button id="panel-acknowledge-button" class="btn"
-                            style="width: 100%;margin-top: 10%">Acknowledge</button>
-
                     </div>
                 </div>
             </div>
