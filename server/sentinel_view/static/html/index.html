@@ -24,7 +24,7 @@
 
 <body class="bg-dark d-flex flex-column" style="height: 100dvh;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
-        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
+        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);z-index: 9999">
         <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
             onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
@@ -88,7 +88,7 @@
         </div>
         <!-- Image Viewer -->
         <div id="image-viewer"
-            style="display:none;position:absolute;width: 100%;height: 92.5vh;top: 7.6%; left:0px;background-color: #000000d9;z-index:9998;overflow:hidden">
+            style="display:none;position:absolute;width: 100%;height: 92.5vh;top: 8.6; left:0px;background-color: #000000d9;z-index:9998;overflow:hidden">
             <div onclick="closeImageViewer()" style="position:absolute;width:100%; height: 100%;z-index: 1"></div>
             <button onclick="closeImageViewer()" id="close-image-viewer-btn"
                 style="background-color: transparent; position: absolute; right: 1vw; top: 1vh; z-index: 3;">

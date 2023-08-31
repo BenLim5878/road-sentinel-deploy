@@ -15,10 +15,10 @@
     <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
 </head>
 
-<body class="bg-dark">
+<body class="bg-dark d-flex flex-column" style="height: 100dvh;width: 100vw;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
-        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
-        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color: transparent"
+        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);z-index: 9999;width:100dvw">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
             onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
                 <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
@@ -39,13 +39,14 @@
                     </clipPath>
                 </defs>
             </svg>
-            <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
+            <h4 class="d-none d-md-block" style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision
+            </h4>
         </button>
         <div>
-            <button class="btn btn-light" onclick="window.location.href='/app/'">
+            <button class="btn btn-success" onclick="window.location.href='/app/'">
                 Maps
             </button>
-            <button class="btn btn-success" onclick="window.location.href='/app/dashboard/'">
+            <button class="btn btn-light" onclick="window.location.href='/app/dashboard/'">
                 Dashboard
             </button>
             <button class="btn btn-danger" onclick="window.location.href='/app/logout'">
@@ -53,12 +54,38 @@
             </button>
         </div>
     </header>
-    <section class="d-flex flex-row justify-content-between" style="width: 100%;height: fit-content">
-        <div class="p-5" style="width: 1450px;margin: 0px auto;">
+    <section class="d-flex d-md-none flex-grow p-5" style="gap: 10px;justify-content:space-evenly">
+        <button class="btn btn-primary" style="width:100%" onclick="window.location.href='/app/dashboard/'">
+            Statistics
+        </button>
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/user/'">
+            Users
+        </button>
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/setting/'">
+            Settings
+        </button>
+    </section>
+    <section class="d-flex flex-row justify-content-between flex-grow-1" style="width: 100%;height: 84dvh">
+        <div class="p-5" style="width: 1450px;margin: 0px auto; overflow-y:scroll">
             <h3 class="text-light mb-5" style="font-weight: 500">Statistics</h3>
-            <div class="container-fluid p-0">
-                <div class="row">
-                    <div class="col-3 mb-6">
+            <div class="container-fluid" style="padding: 0px 0px 10dvh;">
+                <div class="d-flex flex-row flex-wrap" style="gap: 20px">
+                    <style>
+                        @media (max-width: 970px) {
+
+                            #statistic-container-1,
+                            #statistic-container-2,
+                            #total-potholes-by-states {
+                                min-width: 100%;
+                            }
+
+                            #statistic-container-3 {
+                                gap: 20px;
+                            }
+
+                        }
+                    </style>
+                    <div class="col-3 mb-6" id="statistic-container-1">
                         <div class="col col-12">
                             <div class="card shadow border-0" style="background-color: #39393982;">
                                 <div class="card-body">
@@ -133,7 +160,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col-4">
+                    <div class="col-4" id="statistic-container-2">
                         <div class="card shadow border-0" style="background-color: #39393982;">
                             <div class="card-body">
                                 <div class="row">
@@ -188,8 +215,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="row mt-5">
-                    <div class="col-9">
+                <div class="row mt-5" id="statistic-container-3">
+                    <div class="col-9" id="total-potholes-by-states">
                         <div class="card shadow border-0" style="background-color: #39393982;">
                             <div class="card-body">
                                 <div class="row">
@@ -206,7 +233,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="col" style="height: 100px;">
+                    <div class="col" style="height: fit-content;">
                         <div class="card shadow border-0" style="background-color: #39393982;">
                             <div class="card-body">
                                 <div class="row">
@@ -250,10 +277,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
-        <section class="d-flex flex-column p-5"
-            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397)">
+        <section class="d-none d-md-flex flex-column p-5"
+            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397);height: ">
             <button class="btn btn-primary" onclick="window.location.href='/app/dashboard/'">
                 Statistics
             </button>
