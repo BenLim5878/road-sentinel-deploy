@@ -76,6 +76,16 @@ def serve_css(request, css_filename):
     else:
         return HttpResponseNotFound()
     
+def serve_javascript(request, js_filename):
+    # Construct the absolute file path
+    js_path = os.path.join(settings.VIEW_STATIC_ROOT, 'js', js_filename)
+    # Check if the CSS file exists
+    if os.path.exists(js_path):
+        with open(js_path, 'r') as f:
+            return HttpResponse(f.read(), content_type='application/javascript')
+    else:
+        return HttpResponseNotFound()
+    
 def serve_geo_data(request):
     out = []
     user_image = UserImage.objects.all()
