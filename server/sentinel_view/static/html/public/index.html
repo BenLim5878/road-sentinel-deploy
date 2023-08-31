@@ -22,7 +22,7 @@
     <link rel="icon" type="image/x-icon" href="/api/img/resource/app-icon.png">
 </head>
 
-<body class="bg-dark d-flex flex-column" style="height: 100%;overflow-y: hidden;">
+<body class="bg-dark d-flex flex-column" style="height: 100vh;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
         style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);position: relative; z-index: 9999">
         <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
@@ -62,12 +62,12 @@
             </button>
         </div>
     </header>
-    <div>
-        <input type="text" id="place-input-sm" style="position: absolute; z-index: 1000; width: 80%; margin: 1.5% 3% 0%"
-            class="form-control d-none d-sm-none" placeholder="Search by places">
-        <div class="bg-dark" id="place-results-sm"></div>
-    </div>
     <div class="flex-grow-1 d-flex flex-column" style="width:100%;overflow:hidden">
+        <div style="position: absolute;position: absolute; z-index: 1000; width: 80%; margin: 1.5% 3% 0%">
+            <input type=" text" id="place-input-sm" class="form-control d-none d-sm-none"
+                placeholder="Search by places">
+            <div class="bg-dark" id="place-results-sm"></div>
+        </div>
         <!-- App Loader -->
         <div style="width: 25%;height:fit-content;margin:auto;margin-top: 20%;" id="app-loader">
             <p class="text-white mb-5" style="font-size:16px;" id="loading-message">Initializing...</p>
