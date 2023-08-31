@@ -51,6 +51,12 @@ function initMap() {
 
             google.maps.event.addListener(map.getStreetView(), 'visible_changed', function () {
                 closePanel()
+                if (map.getStreetView().getVisible()) {
+                    $("#place-input-sm").addClass("d-none")
+                } else {
+                    $("#place-input-sm").removeClass("d-none")
+                }
+
             });
 
             $('#loading-message').html("Generating Map Components...")
