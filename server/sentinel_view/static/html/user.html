@@ -98,10 +98,10 @@
     </style>
 </head>
 
-<body class="bg-dark">
+<body class="bg-dark d-flex flex-column" style="height: 100dvh;width: 100vw;overflow-y:hidden;">
     <header class="py-3 px-5 bg-dark d-flex flex-row justify-content-between align-items-center"
-        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);">
-        <button class="d-flex flex-row align-items-center" style="gap: 10px;background-color:transparent"
+        style="margin-bottom: 1px;outline: 1px solid rgba(255, 255, 255, 0.685);z-index: 9999;width:100dvw">
+        <button class="d-flex flex-row align-items-center" style="gap: 10px; background-color:transparent"
             onclick="window.location.href='/app/'">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 85 85" fill="none">
                 <circle cx="42.5" cy="42.5" r="42.5" fill="#E8F3F1" />
@@ -122,7 +122,8 @@
                     </clipPath>
                 </defs>
             </svg>
-            <h4 style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision</h3>
+            <h4 class="d-none d-md-block" style="font-family: Poppins;font-weight: 400;color: #ffffff">SentinelVision
+            </h4>
         </button>
         <div>
             <button class="btn btn-light" onclick="window.location.href='/app/'">
@@ -136,13 +137,33 @@
             </button>
         </div>
     </header>
-    <section class="d-flex flex-row justify-content-between" style="width: 100%;height: 92vh">
+    <section class="d-flex d-md-none flex-grow p-5" style="gap: 10px;justify-content:space-evenly">
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/dashboard/'">
+            Statistics
+        </button>
+        <button class="btn btn-primary" style="width:100%" onclick="window.location.href='/app/user/'">
+            Users
+        </button>
+        <button class="btn btn-outline-secondary" style="width:100%" onclick="window.location.href='/app/setting/'">
+            Settings
+        </button>
+    </section>
+    <section class="d-flex flex-row justify-content-between flex-grow-1" style="width: 100%;overflow-y:scroll">
         <div class="p-5" style="margin: auto;">
             <h3 class="text-light mb-7" style="font-weight: 500">Create Users</h3>
-            <div class="card mb-4" style="border:none; background: transparent;width: 1000px">
+            <div class="card mb-4" style="border:none; background: transparent;width: fit-content">
                 <section class="d-flex flex-row justify-content-between" style="width: 100%;gap: 25px">
-                    <div style="width: 500px;">
-                        <div class="card-body pt-0 px-10">
+                    <div>
+                        <style>
+                            @media (max-width: 970px) {
+
+                                #form-container {
+                                    width: 100% !important;
+                                }
+
+                            }
+                        </style>
+                        <div id="form-container" class="card-body pt-0 px-10" style="width: 500px;">
                             <form class="d-flex flex-column" style="gap: 15px">
                                 <div class="d-flex flex-column" style="gap: 10px">
                                     <label for="firstname">First Name</label>
@@ -183,7 +204,7 @@
                                 style="width: 150px" onclick="createUser()">Create</button>
                         </div>
                     </div>
-                    <div style="width: 500px">
+                    <div class="d-md-block d-none">
                         <div class="password-requirement-container">
                             <div class="d-flex flex-row align-items-center" style="gap: 12px">
                                 <div id="password-requirement-logo-1" class="password-requirement-logo-red"></div>
@@ -212,8 +233,8 @@
 
             </div>
         </div>
-        <section class=" d-flex flex-column p-5"
-            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397)">
+        <section class="d-none d-md-flex flex-column p-5"
+            style="width: 300px;gap: 10px;border-left: 1px solid rgba(255, 255, 255, 0.397);">
             <button class="btn btn-outline-secondary" onclick="window.location.href='/app/dashboard/'">
                 Statistics
             </button>
@@ -226,12 +247,12 @@
         </section>
     </section>
     <div id="register-success-message" class="bg-success px-4 py-3 rounded align-items-center"
-        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none">
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none;">
         <i class="bi bi-check-circle-fill text-light text-sm"></i>
         <p class="text-light" style="font-size: 15px;">Account Registered Successfully!</p>
     </div>
     <div id="register-failure-message" class="bg-danger px-4 py-3 rounded align-items-center"
-        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none">
+        style="box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);position:fixed; top: 11%; left: 50%;transform: translate(-50%, 0%); gap: 10px; display: none;">
         <i class="bi bi-dash-circle-fill text-light text-sm"></i>
         <p class="text-light" style="font-size: 15px;" id="failure-message"></p>
     </div>
