@@ -118,11 +118,16 @@
                     border-radius: 0px !important;
                 }
             }
+
+            @media (min-width:577px) {
+                #info-panel {
+                    border-radius: 0.6rem;
+                }
+            }
         </style>
-        <section style="position:absolute;z-index: 10000;top: 11%;left: 1.5%;display:none" class="bg-dark w-100"
+        <section style="position:absolute;z-index: 10000;top: 8%;left: 1.5%;display:none" class="bg-dark w-100"
             id="info-panel">
-            <div class="rounded pb-8" id="info-panel-content" style="box-shadow:
-            0 0 25px 3px #0000008c">
+            <div class="rounded pb-4" id="info-panel-content">
                 <div>
                     <button onclick="closePanel()" id="close-panel-btn" style="background-color: transparent;">
                         <i class="bi bi-x text-light"
@@ -154,6 +159,23 @@
                                     <h4 id="panel-main-title" class="text-light" style="font-weight: 500">City, State
                                     </h4>
                                     <p id="panel-time-past" style="color:#757575">Time Past</p>
+                                    <div class="d-flex mt-1" style="gap: 5px">
+                                        <p style="color: #dbdbdb;font-size: 15px">Type: </p>
+                                        <p id="annotation-status-acknowledged"
+                                            style="display:none;color: #8fffe6;font-size: 15px;">Acknowledged
+                                        </p>
+                                        <p id="annotation-status-unacknowledged"
+                                            style="display: none;color: #ff8f8f;font-size: 15px;">Unacknowledged
+                                        </p>
+                                    </div>
+                                    <p id="annotation-description-acknowledged"
+                                        style="display: none;max-width: 414px;color: #5d5d5d;font-size: 13px;margin-top: 6px;">
+                                        *
+                                        Pothole(s) in this image have been repaired according to the road authority</p>
+                                    <p id="annotation-description-unacknowledged"
+                                        style="display: none;max-width: 414px;color: #5d5d5d;font-size: 13px;margin-top: 6px;">
+                                        *
+                                        Pothole(s) in this image have NOT been repaired</p>
                                 </div>
                                 <div class="d-flex justify-content-between">
                                     <div class="mb-3">
@@ -232,9 +254,17 @@
             if (data.annotation.isAcknowledged) {
                 $('#panel-head-icon').removeClass("text-danger")
                 $('#panel-head-icon').addClass("text-secondary")
+                $('#annotation-status-acknowledged').css("display", "block")
+                $('#annotation-status-unacknowledged').css("display", "none")
+                $('#annotation-description-acknowledged').css("display", "block")
+                $('#annotation-description-unacknowledged').css("display", "none")
             } else {
                 $('#panel-head-icon').removeClass("text-secondary")
                 $('#panel-head-icon').addClass("text-danger")
+                $('#annotation-status-acknowledged').css("display", "none")
+                $('#annotation-status-unacknowledged').css("display", "block")
+                $('#annotation-description-acknowledged').css("display", "none")
+                $('#annotation-description-unacknowledged').css("display", "block")
             }
             //
             $('#panel-head-title').html(data.id)
