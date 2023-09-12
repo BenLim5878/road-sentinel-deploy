@@ -366,9 +366,9 @@ def serve_statistic_data(request):
     
     # Total number of annotated image and total potholes
     for annotation in image_annotations:
-        out["total_annotations"]["number"] += 1
         if annotation.numPothole > 0:
             annotation_has_pothole += 1
+            out["total_annotations"]["number"] += 1
             out["total_potholes"]["number"] += annotation.numPothole
     
     # Increase or decrease since last month
@@ -379,11 +379,13 @@ def serve_statistic_data(request):
     previous_year = current_year if current_month != 1 else (current_year - 1)
     current_month_data = ImageAnnotation.objects.filter(
         processTimestamp__year=current_year, 
-        processTimestamp__month=current_month
+        processTimestamp__month=current_month,
+        numPothole__gt=0
     )
     previous_month_data = ImageAnnotation.objects.filter(
         processTimestamp__year=previous_year, 
-        processTimestamp__month=previous_month
+        processTimestamp__month=previous_month,
+        numPothole__gt=0
     )
     current_month_annotations = current_month_data.count()
     previous_month_annotations = previous_month_data.count()
