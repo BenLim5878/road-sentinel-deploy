@@ -362,10 +362,13 @@ def serve_statistic_data(request):
     user_images = UserImage.objects.all()
     geo_locations = GeoLocationGoogle.objects.all()
     
+    annotation_has_pothole = 0
+    
     # Total number of annotated image and total potholes
     for annotation in image_annotations:
+        out["total_annotations"]["number"] += 1
         if annotation.numPothole > 0:
-            out["total_annotations"]["number"] += 1
+            annotation_has_pothole += 1
             out["total_potholes"]["number"] += annotation.numPothole
     
     # Increase or decrease since last month
@@ -395,7 +398,7 @@ def serve_statistic_data(request):
             
     # Probability of potholes per image
     if (len(user_images) > 0):
-        out["prob_potholes_by_image"] = "{:.2f}".format((out["total_annotations"]["number"] / len(user_images)) * 100)
+        out["prob_potholes_by_image"] = "{:.2f}".format((annotation_has_pothole / len(user_images)) * 100)
     else:
         out["prob_potholes_by_image"] = "{:.2f}".format(0)
         
@@ -409,7 +412,7 @@ def serve_statistic_data(request):
                 
     # Percent of acknowledged annotations
     if (out["total_annotations"]["number"]):
-        out["percent_acknowledged_annotations"] =  "{:.2f}".format((out["total_acknowledged_annotations"] / out["total_annotations"]["number"]) * 100)
+        out["percent_acknowledged_annotations"] =  "{:.2f}".format((out["total_acknowledged_annotations"] / annotation_has_pothole) * 100)
     else:
         out["percent_acknowledged_annotations"] = "{:.2f}".format(0)
         
