@@ -112,8 +112,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-2 mb-0 text-sm">
-                                        <span id="total-annotation-badge"
-                                            class="badge badge-pill me-2 bg-soft-danger text-danger">
+                                        <span id="total-annotation-badge" class="badge badge-pill me-2">
                                             <i class="bi me-1"></i>
                                             <span>0%</span>
                                         </span>
@@ -136,8 +135,7 @@
                                         </div>
                                     </div>
                                     <div class="mt-2 mb-0 text-sm">
-                                        <span id="total-potholes-badge"
-                                            class="badge badge-pill bg-soft-danger text-danger me-2">
+                                        <span id="total-potholes-badge" class="badge badge-pill me-2">
                                             <i class="bi me-1"></i>
                                             <span>0%</span>
                                         </span>
@@ -316,6 +314,7 @@
 
         function populate_dashboard_fields() {
             //
+            console.log(statistic_data)
             $('#total-annotation-text').html(statistic_data['total_annotations']['number'])
             $('#total-annotation-badge span').text(`${statistic_data['total_annotations']['since_last_month']} %`)
             if (statistic_data["total_annotations"]["since_last_month"] > 0) {

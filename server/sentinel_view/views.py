@@ -388,7 +388,7 @@ def serve_statistic_data(request):
     previous_month_potholes = 0 if previous_month_data.aggregate(Sum('numPothole'))['numPothole__sum'] == None else previous_month_data.aggregate(Sum('numPothole'))['numPothole__sum']
     if (previous_month_annotations > 0):
         out["total_annotations"]["since_last_month"] = ((current_month_annotations - previous_month_annotations) / previous_month_annotations) * 100 
-        out["total_potholes"]["since_last_month"] = ((current_month_annotations - previous_month_annotations) / previous_month_annotations) * 100 
+        out["total_potholes"]["since_last_month"] = ((current_month_potholes - previous_month_potholes) / previous_month_potholes) * 100 
     else :
         out["total_annotations"]["since_last_month"] = 0
         out["total_potholes"]["since_last_month"] = 0
