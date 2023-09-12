@@ -343,6 +343,10 @@
                         $("#panel-acknowledge-button").addClass("btn-secondary")
                         $("#panel-acknowledge-button").prop('disabled', true)
                         $("#panel-acknowledge-button").html('Acknowledged')
+                        $('#annotation-status-acknowledged').css("display", "block")
+                        $('#annotation-status-unacknowledged').css("display", "none")
+                        $('#annotation-description-acknowledged').css("display", "block")
+                        $('#annotation-description-unacknowledged').css("display", "none")
                         annotateMarker.forEach((marker_dict) => {
                             if (marker_dict["id"] == data.id) {
                                 marker_dict["marker"].setIcon(getMarkerIcon(data.annotation.pothole.toString(), "#575757", true))
