@@ -329,10 +329,10 @@
             $('#total-potholes-text').html(statistic_data['total_potholes']['number'])
             $('#total-potholes-badge span').text(`${statistic_data['total_potholes']['since_last_month']} %`)
             if (statistic_data["total_potholes"]["since_last_month"] > 0) {
-                $('#total_potholes-badge').addClass("bg-soft-success text-success")
-                $('#total_potholes-badge i').addClass("bi-arrow-up")
+                $('#total-potholes-badge').addClass("bg-soft-success text-success")
+                $('#total-potholes-badge i').addClass("bi-arrow-up")
             } else {
-                $('#total_potholes-badge').addClass("bg-soft-danger text-danger")
+                $('#total-potholes-badge').addClass("bg-soft-danger text-danger")
                 $('#total-potholes-badge i').addClass("bi-arrow-down")
             }
             //
