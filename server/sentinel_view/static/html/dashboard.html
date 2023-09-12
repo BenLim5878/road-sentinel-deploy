@@ -316,7 +316,7 @@
             //
             console.log(statistic_data)
             $('#total-annotation-text').html(statistic_data['total_annotations']['number'])
-            $('#total-annotation-badge span').text(`${statistic_data['total_annotations']['since_last_month']} %`)
+            $('#total-annotation-badge span').text(`${Math.trunc(statistic_data['total_annotations']['since_last_month'])} %`)
             if (statistic_data["total_annotations"]["since_last_month"] > 0) {
                 $('#total-annotation-badge').addClass("bg-soft-success text-success")
                 $('#total-annotation-badge i').addClass("bi-arrow-up")
@@ -326,7 +326,7 @@
             }
             //
             $('#total-potholes-text').html(statistic_data['total_potholes']['number'])
-            $('#total-potholes-badge span').text(`${statistic_data['total_potholes']['since_last_month']} %`)
+            $('#total-potholes-badge span').text(`${Math.trunc(statistic_data['total_potholes']['since_last_month'])} %`)
             if (statistic_data["total_potholes"]["since_last_month"] > 0) {
                 $('#total-potholes-badge').addClass("bg-soft-success text-success")
                 $('#total-potholes-badge i').addClass("bi-arrow-up")
