@@ -12,10 +12,13 @@ import requests
 from sentinel_view.models import SystemConfiguration
 from django_q.tasks import async_task
 from django.utils import timezone
+from django.conf import settings
 
 def check_upload_validity(request):
-    current_time = timezone.localtime(timezone.now())    
+    if (settings.DEBUG):
+        return True
     
+    current_time = timezone.localtime(timezone.now())    
     current_hour = current_time.hour
     if 8 <= current_hour < 18:
         return True
@@ -27,7 +30,7 @@ def upload_validity(request):
     if (isValid):
         return JsonResponse({'isValid':True, 'message': 'Session is established.'})
     else:
-         return JsonResponse({'isValid':False, 'message': 'Please upload run the application on the specified time (8am - 6pm), or session has expired.'})
+         return JsonResponse({'isValid':False, 'message': 'Please run the application on the specified time (8am - 6pm), or session has expired.'})
         
 
 @csrf_exempt
@@ -35,7 +38,7 @@ def process_image(request):
     if request.method == 'POST' and request.FILES.get('image'):
         
         if (not check_upload_validity(request)):
-            return JsonResponse({'message':'Please upload run the application on the specified time (8am - 6pm), or session has expired.'})
+            return JsonResponse({'message':'Please run the application on the specified time (8am - 6pm), or session has expired.'})
         
         # GPS coordinate checking
         if request.POST.get('latitude', None) is not None and request.POST.get('longitude', None) is not None:
